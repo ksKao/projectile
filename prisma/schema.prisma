@@ -6,15 +6,104 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
+model Project {
+    id            String         @id @default(uuid())
+    name          String
+    members       String[]
+    leader        String
+    password      String
+    description   String
+    imageUrl      String
+    kanbanColumns KanbanColumn[]
+    threads       Threads[]
+    files         Files[]
+    polls         Polls[]
+    dueDate       DateTime
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+}
+
+model KanbanColumn {
+    id        String   @id @default(uuid())
+    project   Project  @relation(fields: [projectId], references: [id])
+    projectId String
+    tasks     Task[]
     name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+}
 
-    @@index([name])
+model Task {
+    id              String       @id @default(uuid())
+    title           String
+    description     String
+    kanbanColumn    KanbanColumn @relation(fields: [kanbanColumnId], references: [id])
+    kanbanColumnId  String
+    assignedMembers String[]
+    dueDate         DateTime
+    createdAt       DateTime     @default(now())
+    updatedAt       DateTime     @updatedAt
+}
+
+model Threads {
+    id              String        @id @default(uuid())
+    title           String
+    content         String
+    replies         ThreadReplies @relation(fields: [threadRepliesId], references: [id])
+    threadRepliesId String
+    createdAt       DateTime      @default(now())
+    updatedAt       DateTime      @updatedAt
+    Project         Project?      @relation(fields: [projectId], references: [id])
+    projectId       String?
+}
+
+model ThreadReplies {
+    id        String    @id @default(uuid())
+    content   String
+    author    String
+    Threads   Threads[]
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+}
+
+model Files {
+    id         String   @id @default(uuid())
+    project    Project  @relation(fields: [projectId], references: [id])
+    projectId  String
+    url        String
+    fileName   String
+    uploadedBy String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+}
+
+model Polls {
+    id        String        @id @default(uuid())
+    project   Project       @relation(fields: [projectId], references: [id])
+    projectId String
+    options   PollOptions[]
+    dueDate   DateTime
+    createdAt DateTime      @default(now())
+    updatedAt DateTime      @updatedAt
+}
+
+model PollOptions {
+    id      String  @id @default(uuid())
+    title   String
+    Polls   Polls   @relation(fields: [pollsId], references: [id])
+    pollsId String
+    Votes   Votes[]
+}
+
+model Votes {
+    userId        String
+    option        PollOptions @relation(fields: [pollOptionsId], references: [id])
+    pollOptionsId String
+
+    @@id([userId, pollOptionsId])
 }

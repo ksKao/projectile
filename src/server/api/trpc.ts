@@ -22,7 +22,7 @@ import { db } from "~/server/db";
  */
 
 interface CreateContextOptions {
-  headers: Headers;
+	headers: Headers;
 }
 
 /**
@@ -36,10 +36,10 @@ interface CreateContextOptions {
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
-  return {
-    headers: opts.headers,
-    db,
-  };
+	return {
+		headers: opts.headers,
+		db,
+	};
 };
 
 /**
@@ -49,11 +49,11 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = (opts: { req: NextRequest }) => {
-  // Fetch stuff that depends on the request
+	// Fetch stuff that depends on the request
 
-  return createInnerTRPCContext({
-    headers: opts.req.headers,
-  });
+	return createInnerTRPCContext({
+		headers: opts.req.headers,
+	});
 };
 
 /**
@@ -65,17 +65,19 @@ export const createTRPCContext = (opts: { req: NextRequest }) => {
  */
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
+	transformer: superjson,
+	errorFormatter({ shape, error }) {
+		return {
+			...shape,
+			data: {
+				...shape.data,
+				zodError:
+					error.cause instanceof ZodError
+						? error.cause.flatten()
+						: null,
+			},
+		};
+	},
 });
 
 /**
