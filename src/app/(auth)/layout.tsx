@@ -1,4 +1,5 @@
 import React from "react";
+import { Card, CardContent } from "~/components/ui/card";
 
 export default function AuthLayout({
 	children,
@@ -6,8 +7,8 @@ export default function AuthLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 p-4 rounded-md">
-			{children}
-		</div>
+		<Card className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pt-4 w-96 max-w-[80%]">
+			<CardContent>{children}</CardContent>
+		</Card>
 	);
 }
