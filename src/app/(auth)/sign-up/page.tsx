@@ -1,6 +1,9 @@
 "use client";
+import { useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
+import EmailVerification from "~/components/email-verification";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -17,8 +20,10 @@ export default function SignUp() {
 	const [userInfo, setUserInfo] = useState(emptyFields);
 	const [error, setError] = useState(emptyFields);
 	const [loading, setLoading] = useState(false);
+	const [verifying, setVerifying] = useState(false);
+	const { signUp, setActive } = useSignUp();
 
-	const signUp: React.FormEventHandler<HTMLFormElement> = async (e) => {
+	const handleSignUp: React.FormEventHandler<HTMLFormElement> = async (e) => {
 		e.preventDefault();
 
 		setLoading(true);
@@ -38,15 +43,46 @@ export default function SignUp() {
 			return;
 		}
 
+		try {
+			await signUp?.create({
+				username: userInfo.username,
+				emailAddress: userInfo.email,
+				password: userInfo.password,
+			});
+
+			// send verification email
+			await signUp?.prepareEmailAddressVerification({
+				strategy: "email_code",
+			});
+
+			toast.success(
+				"Email registered. Check your email for the verification code.",
+			);
+			setVerifying(true);
+		} catch (e: any) {
+			if (e.errors?.[0]?.longMessage) {
+				toast.error(e.errors[0].longMessage);
+			} else if (e instanceof Error) {
+				toast.error(e.message);
+			} else {
+				toast.error("Something went wrong. Please try again");
+			}
+		}
+
 		setLoading(false);
 	};
+
+	if (verifying) {
+		return <EmailVerification signUp={signUp} setActive={setActive} />;
+	}
 
 	return (
 		<>
 			<h1 className="font-bold text-2xl text-center min-w-full">
 				Sign Up
 			</h1>
-			<form onSubmit={signUp}>
+			<div className="h-4" />
+			<form onSubmit={handleSignUp}>
 				<Label htmlFor="username">Username</Label>
 				<Input
 					type="text"

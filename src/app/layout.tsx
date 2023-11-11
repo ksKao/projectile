@@ -6,6 +6,8 @@ import { headers } from "next/headers";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "~/components/theme-provider";
+import { Toaster } from "react-hot-toast";
+import Navbar from "~/components/navbar";
 
 const inter = Inter({
 	subsets: ["latin"],
@@ -15,7 +17,7 @@ const inter = Inter({
 export const metadata = {
 	title: "Projectile",
 	description: "A project management app for students",
-	icons: [{ rel: "icon", url: "/favicon.ico" }],
+	icons: [{ rel: "icon", url: "/logo.png" }],
 };
 
 export default function RootLayout({
@@ -34,7 +36,9 @@ export default function RootLayout({
 						disableTransitionOnChange
 					>
 						<TRPCReactProvider headers={headers()}>
-							{children}
+							<Toaster position="top-center" />
+							<Navbar />
+							<main>{children}</main>
 						</TRPCReactProvider>
 					</ThemeProvider>
 				</body>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { signInSchema } from "~/lib/schema";
 
 const emptyFields = {
 	email: "",
@@ -18,6 +19,22 @@ export default function SignIn() {
 
 	const signIn: React.FormEventHandler<HTMLFormElement> = async (e) => {
 		e.preventDefault();
+		setLoading(true);
+		setError(emptyFields);
+
+		const result = signInSchema.safeParse(userInfo);
+
+		if (!result.success) {
+			const error = result.error.flatten().fieldErrors;
+			setError({
+				email: error.email?.[0] ?? "",
+				password: error.password?.[0] ?? "",
+			});
+			setLoading(false);
+			return;
+		}
+
+		setLoading(false);
 	};
 
 	return (
@@ -25,6 +42,7 @@ export default function SignIn() {
 			<h1 className="font-bold text-2xl text-center min-w-full">
 				Sign In
 			</h1>
+			<div className="h-4" />
 			<form onSubmit={signIn}>
 				<Label htmlFor="email">Email</Label>
 				<Input
