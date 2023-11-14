@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { MdLightMode, MdDarkMode } from "react-icons/md";
+import { FaGear } from "react-icons/fa6";
 
 export default function Navbar() {
 	const { theme, setTheme } = useTheme();
 	const { signOut } = useClerk();
-	const { replace } = useRouter();
+	const router = useRouter();
 	const { user } = useUser();
 
 	return (
@@ -19,13 +21,24 @@ export default function Navbar() {
 				<h1 className="font-bold text-xl select-none">Projectile</h1>
 			</Link>
 			<div className="flex items-center gap-4">
-				<button
+				<Button
 					onClick={() => {
 						setTheme(theme === "dark" ? "light" : "dark");
 					}}
+					variant="outline"
 				>
-					Change Theme
-				</button>
+					{theme === "dark" ? (
+						<MdDarkMode className="w-4 h-4" />
+					) : (
+						<MdLightMode className="w-4 h-4" />
+					)}
+				</Button>
+				<Button
+					onClick={() => router.push("/settings")}
+					variant="outline"
+				>
+					<FaGear className="w-4 h-4" />
+				</Button>
 				<Image
 					src={user?.imageUrl ?? ""}
 					alt="User Profile Picture"
@@ -35,7 +48,7 @@ export default function Navbar() {
 				/>
 				<Button
 					onClick={async () => {
-						replace("/sign-in");
+						router.replace("/sign-in");
 						await signOut();
 					}}
 				>
