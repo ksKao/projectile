@@ -8,7 +8,7 @@ export default function PagesLayout({
 	return (
 		<>
 			<Navbar />
-			<main>{children}</main>
+			<main className="mx-8 md:mx-12 lg:mx-16">{children}</main>
 		</>
 	);
 }

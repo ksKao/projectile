@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MdLightMode, MdDarkMode } from "react-icons/md";
 import { FaGear } from "react-icons/fa6";
+import { Skeleton } from "./ui/skeleton";
 
 export default function Navbar() {
 	const { theme, setTheme } = useTheme();
@@ -15,7 +16,7 @@ export default function Navbar() {
 	const { user } = useUser();
 
 	return (
-		<nav className="w-screen h-24 bg-background flex justify-between items-center px-4">
+		<nav className="w-screen h-24 bg-background flex justify-between items-center px-8 md:px-12 lg:px-16">
 			<Link href="/" className="flex items-center gap-4">
 				<Image src="/logo.png" alt="Logo" width={40} height={40} />
 				<h1 className="font-bold text-xl select-none">Projectile</h1>
@@ -39,13 +40,18 @@ export default function Navbar() {
 				>
 					<FaGear className="w-4 h-4" />
 				</Button>
-				<Image
-					src={user?.imageUrl ?? ""}
-					alt="User Profile Picture"
-					width={36}
-					height={36}
-					className="rounded-full"
-				/>
+
+				{user ? (
+					<Image
+						src={user.imageUrl ?? ""}
+						alt="User Profile Picture"
+						width={36}
+						height={36}
+						className="rounded-full"
+					/>
+				) : (
+					<Skeleton className="w-9 h-9 rounded-full" />
+				)}
 				<Button
 					onClick={async () => {
 						router.replace("/sign-in");

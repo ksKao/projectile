@@ -7,7 +7,7 @@ export default async function Home() {
 
 	return (
 		<>
-			<h1>Dashboard</h1>
+			<h1 className="font-bold text-4xl">My Projects</h1>
 			{user?.username}
 		</>
 	);
