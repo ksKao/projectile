@@ -8,8 +8,8 @@ export default async function AuthLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const user = await currentUser();
-	if (user) redirect("/");
+	// const user = await currentUser();
+	// if (user) redirect("/");
 
 	return (
 		<Card className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pt-4 w-96 max-w-[80%]">
