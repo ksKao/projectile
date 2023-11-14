@@ -59,9 +59,9 @@ export default function SignIn() {
 			} else {
 				toast.error("Something went wrong. Please try again");
 			}
+		} finally {
+			setLoading(false);
 		}
-
-		setLoading(false);
 	};
 
 	return (
@@ -85,21 +85,28 @@ export default function SignIn() {
 						});
 					}}
 				/>
-				<div className="h-4" />
-				<Label htmlFor="password">Password</Label>
-				<Input
-					type="password"
-					id="password"
-					placeholder="Password"
-					value={userInfo.password}
-					errorMessage={error.password}
-					onChange={(e) => {
-						setUserInfo({
-							...userInfo,
-							password: e.target.value,
-						});
-					}}
-				/>
+				<div className="relative">
+					<Label htmlFor="password">Password</Label>
+					<Input
+						type="password"
+						id="password"
+						placeholder="Password"
+						value={userInfo.password}
+						errorMessage={error.password}
+						onChange={(e) => {
+							setUserInfo({
+								...userInfo,
+								password: e.target.value,
+							});
+						}}
+					/>
+					<Link
+						href="/password-reset"
+						className="absolute right-0 bottom-0 hover:underline text-primary text-sm"
+					>
+						Forgot password
+					</Link>
+				</div>
 				<Button className="w-full mt-6" loading={loading}>
 					Sign In
 				</Button>

@@ -46,9 +46,9 @@ export default function EmailVerification({
 			} else {
 				toast.error("Something went wrong. Please try again");
 			}
+		} finally {
+			setLoading(false);
 		}
-
-		setLoading(false);
 	};
 
 	return (

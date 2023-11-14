@@ -8,9 +8,9 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-	({ className, type, errorMessage = "", ...props }, ref) => {
+	({ className, type, errorMessage = "Test", ...props }, ref) => {
 		return (
-			<>
+			<div>
 				<input
 					type={type}
 					className={cn(
@@ -22,10 +22,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					ref={ref}
 					{...props}
 				/>
-				{errorMessage && (
+				{errorMessage ? (
 					<span className="text-sm text-red-500">{errorMessage}</span>
+				) : (
+					<div className="h-5" />
 				)}
-			</>
+			</div>
 		);
 	},
 );

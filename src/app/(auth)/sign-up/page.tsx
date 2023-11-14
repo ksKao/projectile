@@ -67,9 +67,9 @@ export default function SignUp() {
 			} else {
 				toast.error("Something went wrong. Please try again");
 			}
+		} finally {
+			setLoading(false);
 		}
-
-		setLoading(false);
 	};
 
 	if (verifying) {
@@ -97,7 +97,6 @@ export default function SignUp() {
 						})
 					}
 				/>
-				<div className="h-4" />
 				<Label htmlFor="email">Email</Label>
 				<Input
 					type="text"
@@ -112,7 +111,6 @@ export default function SignUp() {
 						});
 					}}
 				/>
-				<div className="h-4" />
 				<Label htmlFor="password">Password</Label>
 				<Input
 					type="password"
@@ -127,7 +125,6 @@ export default function SignUp() {
 						});
 					}}
 				/>
-				<div className="h-4" />
 				<Label htmlFor="confirmPassword">Confirm Password</Label>
 				<Input
 					type="password"
