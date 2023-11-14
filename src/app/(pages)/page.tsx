@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs";
 import { api } from "~/trpc/server";
 
 export default async function Home() {

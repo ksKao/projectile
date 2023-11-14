@@ -37,8 +37,7 @@ export default function RootLayout({
 					>
 						<TRPCReactProvider headers={headers()}>
 							<Toaster position="top-center" />
-							<Navbar />
-							<main>{children}</main>
+							{children}
 						</TRPCReactProvider>
 					</ThemeProvider>
 				</body>

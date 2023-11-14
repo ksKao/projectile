@@ -1,8 +1,11 @@
 "use client";
 
+import { useSignIn } from "@clerk/nextjs";
 import { Label } from "@radix-ui/react-label";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { signInSchema } from "~/lib/schema";
@@ -16,8 +19,10 @@ export default function SignIn() {
 	const [userInfo, setUserInfo] = useState(emptyFields);
 	const [error, setError] = useState(emptyFields);
 	const [loading, setLoading] = useState(false);
+	const { signIn, setActive } = useSignIn();
+	const router = useRouter();
 
-	const signIn: React.FormEventHandler<HTMLFormElement> = async (e) => {
+	const handleSignIn: React.FormEventHandler<HTMLFormElement> = async (e) => {
 		e.preventDefault();
 		setLoading(true);
 		setError(emptyFields);
@@ -34,6 +39,28 @@ export default function SignIn() {
 			return;
 		}
 
+		try {
+			const result = await signIn?.create({
+				identifier: userInfo.email,
+				password: userInfo.password,
+			});
+
+			if (result?.status === "complete") {
+				await setActive?.({ session: result.createdSessionId });
+				router.push("/");
+			}
+		} catch (e: any) {
+			if (e.errors?.[0]?.longMessage) {
+				toast.error(e.errors[0].longMessage);
+			} else if (e.errors?.[0]?.message) {
+				toast.error(e.errors[0].message);
+			} else if (e instanceof Error) {
+				toast.error(e.message);
+			} else {
+				toast.error("Something went wrong. Please try again");
+			}
+		}
+
 		setLoading(false);
 	};
 
@@ -43,7 +70,7 @@ export default function SignIn() {
 				Sign In
 			</h1>
 			<div className="h-4" />
-			<form onSubmit={signIn}>
+			<form onSubmit={handleSignIn}>
 				<Label htmlFor="email">Email</Label>
 				<Input
 					type="text"
