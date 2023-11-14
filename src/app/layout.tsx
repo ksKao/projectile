@@ -7,7 +7,6 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "react-hot-toast";
-import Navbar from "~/components/navbar";
 
 const inter = Inter({
 	subsets: ["latin"],

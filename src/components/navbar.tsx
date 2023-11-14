@@ -1,7 +1,7 @@
 "use client";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,7 +24,7 @@ export default function Navbar() {
 						setTheme(theme === "dark" ? "light" : "dark");
 					}}
 				>
-					{theme}
+					Change Theme
 				</button>
 				<Image
 					src={user?.imageUrl ?? ""}

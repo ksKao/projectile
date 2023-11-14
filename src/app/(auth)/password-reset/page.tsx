@@ -104,8 +104,8 @@ export default function PasswordResetForm() {
 			});
 
 			if (result?.status === "complete") {
-				setActive?.({ session: result.createdSessionId });
 				toast.success("Your password has been reset");
+				setActive?.({ session: result.createdSessionId });
 				router.replace("/");
 			} else {
 				throw new Error("Something went wrong. Please try again");
