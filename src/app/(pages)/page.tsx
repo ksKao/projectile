@@ -1,5 +1,5 @@
 import { currentUser } from "@clerk/nextjs";
-import { Button } from "~/components/ui/button";
+import CreateProjectModal from "~/components/create-project-modal";
 import { api } from "~/trpc/server";
 
 export default async function Home() {
@@ -10,7 +10,7 @@ export default async function Home() {
 		<>
 			<div className="flex justify-between items-center">
 				<h1 className="font-bold text-4xl">My Projects</h1>
-				<Button className="font-semibold">Create Project</Button>
+				<CreateProjectModal />
 			</div>
 			{user?.username}
 		</>
