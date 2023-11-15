@@ -1,16 +1,19 @@
 "use client";
 import { useClerk, useUser } from "@clerk/nextjs";
-import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { MdLightMode, MdDarkMode } from "react-icons/md";
 import { FaGear } from "react-icons/fa6";
 import { Skeleton } from "./ui/skeleton";
+import dynamic from "next/dynamic";
+
+const ToggleThemeButton = dynamic(
+	() => import("@/components/toggle-theme-button"),
+	{ ssr: false },
+);
 
 export default function Navbar() {
-	const { theme, setTheme } = useTheme();
 	const { signOut } = useClerk();
 	const router = useRouter();
 	const { user } = useUser();
@@ -22,18 +25,7 @@ export default function Navbar() {
 				<h1 className="font-bold text-xl select-none">Projectile</h1>
 			</Link>
 			<div className="flex items-center gap-4">
-				<Button
-					onClick={() => {
-						setTheme(theme === "dark" ? "light" : "dark");
-					}}
-					variant="outline"
-				>
-					{theme === "dark" ? (
-						<MdDarkMode className="w-4 h-4" />
-					) : (
-						<MdLightMode className="w-4 h-4" />
-					)}
-				</Button>
+				<ToggleThemeButton />
 				<Button
 					onClick={() => router.push("/settings")}
 					variant="outline"
