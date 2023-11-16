@@ -131,21 +131,21 @@ export default function PasswordResetForm() {
 					Password Reset
 				</h1>
 				<form onSubmit={handleResetPassword}>
-					<Label htmlFor="code">Code</Label>
 					<Input
 						type="number"
 						id="code"
 						placeholder="Code"
+						label="Code"
 						value={code}
 						errorMessage={error.code}
 						onChange={(e) => {
 							setCode(e.target.value);
 						}}
 					/>
-					<Label htmlFor="password">New Password</Label>
 					<Input
 						type="password"
 						id="password"
+						label="New Password"
 						placeholder="New Password"
 						value={password}
 						errorMessage={error.password}
@@ -168,18 +168,18 @@ export default function PasswordResetForm() {
 			</h1>
 			<div className="h-4" />
 			<form onSubmit={handleSendPasswordResetCode}>
-				<Label htmlFor="email">Email</Label>
 				<Input
 					type="text"
 					id="email"
 					placeholder="Email"
+					label="Email"
 					value={email}
 					errorMessage={error.email}
 					onChange={(e) => {
 						setEmail(e.target.value);
 					}}
 				/>
-				<Button className="w-full mt-6" loading={loading}>
+				<Button className="w-full mt-4" loading={loading}>
 					Send Password Reset Code
 				</Button>
 			</form>

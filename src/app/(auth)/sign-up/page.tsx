@@ -83,11 +83,11 @@ export default function SignUp() {
 			</h1>
 			<div className="h-4" />
 			<form onSubmit={handleSignUp}>
-				<Label htmlFor="username">Username</Label>
 				<Input
 					type="text"
 					id="username"
 					placeholder="Username"
+					label="Username"
 					value={userInfo.username}
 					errorMessage={error.username}
 					onChange={(e) =>
@@ -97,11 +97,11 @@ export default function SignUp() {
 						})
 					}
 				/>
-				<Label htmlFor="email">Email</Label>
 				<Input
 					type="text"
 					id="email"
 					placeholder="Email"
+					label="Email"
 					value={userInfo.email}
 					errorMessage={error.email}
 					onChange={(e) => {
@@ -111,11 +111,11 @@ export default function SignUp() {
 						});
 					}}
 				/>
-				<Label htmlFor="password">Password</Label>
 				<Input
 					type="password"
 					id="password"
 					placeholder="Password"
+					label="Password"
 					value={userInfo.password}
 					errorMessage={error.password}
 					onChange={(e) => {
@@ -125,10 +125,10 @@ export default function SignUp() {
 						});
 					}}
 				/>
-				<Label htmlFor="confirmPassword">Confirm Password</Label>
 				<Input
 					type="password"
 					id="confirmPassword"
+					label="Confirm Password"
 					placeholder="Confirm Password"
 					value={userInfo.confirmPassword}
 					errorMessage={error.confirmPassword}

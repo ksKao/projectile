@@ -71,11 +71,11 @@ export default function SignIn() {
 			</h1>
 			<div className="h-4" />
 			<form onSubmit={handleSignIn}>
-				<Label htmlFor="email">Email</Label>
 				<Input
 					type="text"
 					id="email"
 					placeholder="Email"
+					label="Email"
 					value={userInfo.email}
 					errorMessage={error.email}
 					onChange={(e) => {
@@ -86,11 +86,11 @@ export default function SignIn() {
 					}}
 				/>
 				<div className="relative">
-					<Label htmlFor="password">Password</Label>
 					<Input
 						type="password"
 						id="password"
 						placeholder="Password"
+						label="Password"
 						value={userInfo.password}
 						errorMessage={error.password}
 						onChange={(e) => {

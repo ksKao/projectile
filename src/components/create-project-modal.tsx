@@ -32,28 +32,30 @@ export default function CreateProjectModal() {
 					<DialogTitle>Create Project</DialogTitle>
 				</DialogHeader>
 				<form>
-					<Label htmlFor="name">Project Name</Label>
 					<Input
 						type="text"
 						id="name"
 						name="text"
+						label="Project Name"
 						placeholder="Project Name"
 					/>
-					<Label htmlFor="description">Project Description</Label>
 					<Textarea
 						id="description"
 						name="description"
 						className="resize-none"
 						placeholder="Project Description"
+						label="Project Description"
 					/>
-					<Label htmlFor="picture">Project Picture</Label>
 					<Input
-						id="picture"
-						name="picture"
+						id="thumbnail"
+						name="thumbnail"
 						type="file"
 						accept="image/*"
+						label="Project Thumbnail"
 					/>
-					<Label>Project Due Date</Label>
+					<Label className="font-medium text-sm mb-[6px]">
+						Project Due Date
+					</Label>
 					<Popover>
 						<PopoverTrigger asChild>
 							<Button
