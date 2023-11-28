@@ -10,7 +10,7 @@ export function generatePassword(length: number | undefined = 16) {
 		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	let password = "";
 
-	for (var i = 0, n = charset.length; i < length; ++i) {
+	for (let i = 0, n = charset.length; i < length; ++i) {
 		password += charset.charAt(Math.floor(Math.random() * n));
 	}
 

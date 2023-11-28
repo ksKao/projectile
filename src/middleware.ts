@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 // See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your Middleware
 export default authMiddleware({
 	publicRoutes: ["/password-reset"],
-	afterAuth(auth, req, evt) {
+	afterAuth(auth, req) {
 		// if user is signed in and browsing to public route, redirect to home page
 		if (auth.userId && auth.isPublicRoute)
 			return NextResponse.redirect(new URL("/", req.url));

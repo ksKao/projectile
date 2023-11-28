@@ -1,7 +1,6 @@
 "use client";
 
 import { useSignIn } from "@clerk/nextjs";
-import { Label } from "@radix-ui/react-label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -111,7 +110,7 @@ export default function SignIn() {
 					Sign In
 				</Button>
 				<p className="w-full text-center mt-2">
-					Don't have an account?{" "}
+					Don&apos;t have an account?{" "}
 					<Link
 						href="/sign-up"
 						className="text-primary hover:underline"

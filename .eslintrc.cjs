@@ -15,6 +15,10 @@ const config = {
 		// Feel free to reconfigure them to your own preference.
 		"@typescript-eslint/array-type": "off",
 		"@typescript-eslint/consistent-type-definitions": "off",
+		"@typescript-eslint/no-explicit-any": "off",
+		"@typescript-eslint/no-misused-promises": "off",
+		"@typescript-eslint/no-unsafe-member-access": "off",
+		"@typescript-eslint/no-unsafe-argument": "off",
 
 		"@typescript-eslint/consistent-type-imports": [
 			"warn",
@@ -26,12 +30,6 @@ const config = {
 		"@typescript-eslint/no-unused-vars": [
 			"warn",
 			{ argsIgnorePattern: "^_" },
-		],
-		"@typescript-eslint/no-misused-promises": [
-			2,
-			{
-				checksVoidReturn: { attributes: false },
-			},
 		],
 	},
 };

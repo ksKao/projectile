@@ -11,8 +11,8 @@ import { type NextRequest } from "next/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import {
-	SignedInAuthObject,
-	SignedOutAuthObject,
+	type SignedInAuthObject,
+	type SignedOutAuthObject,
 	getAuth,
 } from "@clerk/nextjs/server";
 
@@ -41,7 +41,7 @@ interface CreateContextOptions {
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
+export const createInnerTRPCContext = (opts: CreateContextOptions) => {
 	return {
 		headers: opts.headers,
 		auth: opts.auth,
@@ -55,10 +55,10 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: { req: NextRequest }) => {
+export const createTRPCContext = (opts: { req: NextRequest }) => {
 	// Fetch stuff that depends on the request
 
-	return await createInnerTRPCContext({
+	return createInnerTRPCContext({
 		headers: opts.req.headers,
 		auth: getAuth(opts.req),
 	});

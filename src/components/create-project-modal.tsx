@@ -48,9 +48,7 @@ export default function CreateProjectModal() {
 	});
 	const [calendarOpen, setCalendarOpen] = useState(false);
 
-	const createProject: React.FormEventHandler<HTMLFormElement> = async (
-		e,
-	) => {
+	const createProject: React.FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
 		setError(emptyError);
 
@@ -81,10 +79,10 @@ export default function CreateProjectModal() {
 				const errors = mutation.error.data.zodError.fieldErrors;
 
 				setError({
-					name: errors["name"]?.[0] ?? "",
-					description: errors["description"]?.[0] ?? "",
-					dueDate: errors["dueDate"]?.[0] ?? "",
-					image: errors["image"]?.[0] ?? "",
+					name: errors?.name?.[0] ?? "",
+					description: errors?.description?.[0] ?? "",
+					dueDate: errors?.dueDate?.[0] ?? "",
+					image: errors?.image?.[0] ?? "",
 				});
 			} else {
 				toast.error(mutation.error.message);

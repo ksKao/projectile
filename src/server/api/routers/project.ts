@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 import { createProjectSchema } from "~/lib/schema";
 import { generatePassword } from "~/lib/utils";
 

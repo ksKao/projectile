@@ -1,7 +1,6 @@
 "use client";
 import { useSignIn } from "@clerk/nextjs";
-import { Label } from "@radix-ui/react-label";
-import { FormEventHandler, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -72,7 +71,7 @@ export default function PasswordResetForm() {
 		}
 	};
 
-	const handleResetPassword: FormEventHandler<HTMLFormElement> = async (
+	const handleResetPassword: React.FormEventHandler<HTMLFormElement> = async (
 		e,
 	) => {
 		e.preventDefault();
@@ -105,7 +104,7 @@ export default function PasswordResetForm() {
 
 			if (result?.status === "complete") {
 				toast.success("Your password has been reset");
-				setActive?.({ session: result.createdSessionId });
+				await setActive?.({ session: result.createdSessionId });
 				router.replace("/");
 			} else {
 				throw new Error("Something went wrong. Please try again");
