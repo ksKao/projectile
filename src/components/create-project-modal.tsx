@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import { createProjectSchema } from "~/lib/schema";
 import toast from "react-hot-toast";
+import { supabaseClient } from "~/lib/supabaseClient";
 
 type ProjectInfo = {
 	name: string;
@@ -53,8 +54,17 @@ export default function CreateProjectModal() {
 				toast.error(e.message);
 			}
 		},
-		onSuccess: (data) => {
-			toast.success(data);
+		onSuccess: async (data) => {
+			if (!projectInfo.image) return;
+			const res = await supabaseClient.storage
+				.from("projects")
+				.uploadToSignedUrl(data.path, data.token, projectInfo.image, {
+					upsert: true,
+				});
+			if (res.error) toast.error(res.error.message);
+			else {
+				toast.success("Your project has been successfully created.");
+			}
 		},
 	});
 	const [error, setError] = useState(emptyError);

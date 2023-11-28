@@ -34,10 +34,9 @@ export const projectRouter = createTRPCRouter({
 						message: error.message,
 					});
 
-				console.log("return");
-				console.log(data);
-
-				return data.signedUrl;
+				return {
+					...data,
+				};
 			} catch {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
