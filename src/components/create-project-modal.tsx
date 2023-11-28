@@ -39,7 +39,7 @@ const emptyError = {
 };
 
 export default function CreateProjectModal() {
-	const mutation = api.project.createProject.useMutation({
+	const createMutation = api.project.createProject.useMutation({
 		onError: (e) => {
 			if (e.data?.zodError) {
 				const errors = e.data.zodError.fieldErrors;
@@ -61,12 +61,16 @@ export default function CreateProjectModal() {
 				.uploadToSignedUrl(data.path, data.token, projectInfo.image, {
 					upsert: true,
 				});
-			if (res.error) toast.error(res.error.message);
-			else {
+			if (res.error) {
+				// if image failed to upload, delete the record in db
+				deleteMutation.mutate(data.projectId);
+				toast.error(res.error.message);
+			} else {
 				toast.success("Your project has been successfully created.");
 			}
 		},
 	});
+	const deleteMutation = api.project.deleteProject.useMutation();
 	const [error, setError] = useState(emptyError);
 	const [projectInfo, setProjectInfo] = useState<ProjectInfo>({
 		name: "",
@@ -97,7 +101,7 @@ export default function CreateProjectModal() {
 			return;
 		}
 
-		mutation.mutate({
+		createMutation.mutate({
 			...projectInfo,
 			image: projectInfo.image?.name ?? "",
 		});
@@ -206,7 +210,7 @@ export default function CreateProjectModal() {
 					</Popover>
 					<Button
 						className="mt-6 w-full"
-						loading={mutation.isLoading}
+						loading={createMutation.isLoading}
 					>
 						Create Project
 					</Button>
