@@ -38,7 +38,25 @@ const emptyError = {
 };
 
 export default function CreateProjectModal() {
-	const mutation = api.project.createProject.useMutation();
+	const mutation = api.project.createProject.useMutation({
+		onError: (e) => {
+			if (e.data?.zodError) {
+				const errors = e.data.zodError.fieldErrors;
+
+				setError({
+					name: errors?.name?.[0] ?? "",
+					description: errors?.description?.[0] ?? "",
+					dueDate: errors?.dueDate?.[0] ?? "",
+					image: errors?.image?.[0] ?? "",
+				});
+			} else {
+				toast.error(e.message);
+			}
+		},
+		onSuccess: (data) => {
+			toast.success(data);
+		},
+	});
 	const [error, setError] = useState(emptyError);
 	const [projectInfo, setProjectInfo] = useState<ProjectInfo>({
 		name: "",
@@ -73,28 +91,6 @@ export default function CreateProjectModal() {
 			...projectInfo,
 			image: projectInfo.image?.name ?? "",
 		});
-
-		if (mutation.isError) {
-			if (mutation.error.data?.zodError) {
-				const errors = mutation.error.data.zodError.fieldErrors;
-
-				setError({
-					name: errors?.name?.[0] ?? "",
-					description: errors?.description?.[0] ?? "",
-					dueDate: errors?.dueDate?.[0] ?? "",
-					image: errors?.image?.[0] ?? "",
-				});
-			} else {
-				toast.error(mutation.error.message);
-			}
-			return;
-		} else if (mutation.isSuccess) {
-			console.log("mutation success");
-			toast.success(mutation.data);
-		} else {
-			console.log("else");
-			console.log(mutation.data);
-		}
 	};
 
 	return (
@@ -168,6 +164,7 @@ export default function CreateProjectModal() {
 											? "border-red-500 border"
 											: ""
 									}`}
+									type="button"
 								>
 									<span>
 										{format(projectInfo.dueDate, "PPP")}
