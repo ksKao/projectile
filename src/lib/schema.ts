@@ -45,3 +45,13 @@ export const passwordResetSchema = z.object({
 		.min(1, "Password is required")
 		.min(8, "Password must be at least 8 characters"),
 });
+
+export const createProjectSchema = z.object({
+	name: z
+		.string()
+		.min(1, "Project name is required")
+		.max(255, "Project name cannot be longer than 255 characters."),
+	description: z.string(),
+	dueDate: z.date(),
+	image: z.string().min(1, "Project thumbnail is required"),
+});
