@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs";
 import CreateProjectModal from "~/components/create-project-modal";
 import { api } from "~/trpc/server";
-import Image from "next/image";
 import ProjectCard from "~/components/project-card";
 
 export default async function Home() {
@@ -11,7 +10,7 @@ export default async function Home() {
 	return (
 		<>
 			<div className="flex justify-between items-center">
-				<h1 className="font-bold text-4xl">My Projects</h1>
+				<h1 className="font-bold text-3xl">My Projects</h1>
 				<CreateProjectModal />
 			</div>
 			{user?.username}

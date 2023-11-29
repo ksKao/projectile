@@ -21,8 +21,8 @@ export default function ProjectCard({ project }: { project: Project }) {
 	const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
 	return (
 		<Card>
-			<CardContent className="p-4 w-96">
-				<div className="flex">
+			<CardContent className="p-4 w-96 max-w-full">
+				<div className="flex max-w-full">
 					<div className="relative w-24 h-24">
 						{!thumbnailLoaded && (
 							<Skeleton className="rounded-md w-24 h-24 absolute" />
@@ -36,7 +36,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 							onLoad={() => setThumbnailLoaded(true)}
 						/>
 					</div>
-					<div className="ml-4">
+					<div className="ml-4 flex flex-col justify-between">
 						<p className="font-bold text-2xl overflow-ellipsis overflow-hidden whitespace-nowrap max-w-[210px]">
 							{project.name}
 						</p>
@@ -48,8 +48,8 @@ export default function ProjectCard({ project }: { project: Project }) {
 											<Image
 												src={member.imageUrl}
 												alt={member.userId}
-												width={40}
-												height={40}
+												width={32}
+												height={32}
 												className="rounded-full"
 											/>
 										</div>
