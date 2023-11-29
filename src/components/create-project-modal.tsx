@@ -23,6 +23,7 @@ import { api } from "~/trpc/react";
 import { createProjectSchema } from "~/lib/schema";
 import toast from "react-hot-toast";
 import { supabaseClient } from "~/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 type ProjectInfo = {
 	name: string;
@@ -39,6 +40,7 @@ const emptyError = {
 };
 
 export default function CreateProjectModal() {
+	const router = useRouter();
 	const createMutation = api.project.createProject.useMutation({
 		onError: (e) => {
 			if (e.data?.zodError) {
@@ -67,6 +69,7 @@ export default function CreateProjectModal() {
 				toast.error(res.error.message);
 			} else {
 				toast.success("Your project has been successfully created.");
+				router.refresh();
 			}
 		},
 	});
@@ -97,7 +100,6 @@ export default function CreateProjectModal() {
 				dueDate: errors.dueDate?.[0] ?? "",
 				image: errors.image?.[0] ?? "",
 			});
-			console.log(error);
 			return;
 		}
 

@@ -11,22 +11,24 @@ export const projectRouter = createTRPCRouter({
 		.input(createProjectSchema)
 		.mutation(async ({ input, ctx }) => {
 			try {
+				const imageExtension = input.image.split(".").pop();
+
 				const project = await ctx.db.projects.create({
 					data: {
 						name: input.name,
 						description: input.description,
 						dueDate: input.dueDate,
+						thumbnailFileName: `thumbnail.${imageExtension}`,
 						password: generatePassword(),
 						leader: ctx.auth.userId,
 						members: [ctx.auth.userId],
 					},
 				});
 
-				const imageExtension = input.image.split(".").pop();
 				const { data, error } = await supabase.storage
 					.from("projects")
 					.createSignedUploadUrl(
-						`${project.id}/thumbnail.${imageExtension}`,
+						`${project.id}/${project.thumbnailFileName}`,
 					);
 
 				if (error)
@@ -76,4 +78,49 @@ export const projectRouter = createTRPCRouter({
 				},
 			});
 		}),
+	getAllProjects: protectedProcedure.query(async ({ ctx }) => {
+		try {
+			const projects = await ctx.db.projects.findMany({
+				where: {
+					members: {
+						has: ctx.auth.userId,
+					},
+				},
+			});
+
+			if (projects.length <= 0)
+				return projects.map((p, i) => {
+					return {
+						...p,
+						thumbnailUrl: "",
+					};
+				});
+
+			const res = await supabase.storage
+				.from("projects")
+				.createSignedUrls(
+					projects.map((p) => `${p.id}/${p.thumbnailFileName}`),
+					60,
+				);
+
+			if (res.error) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: res.error.message,
+				});
+			}
+
+			return projects.map((p, i) => {
+				return {
+					...p,
+					thumbnailUrl: res.data?.[i]?.signedUrl ?? "",
+				};
+			});
+		} catch {
+			throw new TRPCError({
+				code: "INTERNAL_SERVER_ERROR",
+				message: "Something went wrong. Please try again later.",
+			});
+		}
+	}),
 });

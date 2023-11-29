@@ -1,8 +1,10 @@
 import { currentUser } from "@clerk/nextjs";
 import CreateProjectModal from "~/components/create-project-modal";
+import { api } from "~/trpc/server";
+import Image from "next/image";
 
 export default async function Home() {
-	//const hello = await api.post.hello.query({ text: "from tRPC" });
+	const projects = await api.project.getAllProjects.query();
 	const user = await currentUser();
 
 	return (
@@ -12,6 +14,21 @@ export default async function Home() {
 				<CreateProjectModal />
 			</div>
 			{user?.username}
+			{projects.length > 0 ? (
+				projects.map((p) => (
+					<div key={p.id}>
+						<Image
+							src={p.thumbnailUrl}
+							alt={p.name}
+							width={40}
+							height={40}
+						/>
+						{p.name}
+					</div>
+				))
+			) : (
+				<p>No Projects</p>
+			)}
 		</>
 	);
 }

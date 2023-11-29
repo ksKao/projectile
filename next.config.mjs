@@ -11,6 +11,9 @@ const config = {
 			{
 				hostname: "img.clerk.com",
 			},
+			{
+				hostname: "erwizundtgcsfnvlyvim.supabase.co",
+			},
 		],
 	},
 };
