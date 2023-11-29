@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs";
 import CreateProjectModal from "~/components/create-project-modal";
 import { api } from "~/trpc/server";
 import Image from "next/image";
+import ProjectCard from "~/components/project-card";
 
 export default async function Home() {
 	const projects = await api.project.getAllProjects.query();
@@ -14,40 +15,23 @@ export default async function Home() {
 				<CreateProjectModal />
 			</div>
 			{user?.username}
-			{projects.length > 0 ? (
-				projects.map((p) => (
-					<div key={p.id}>
-						<div className="relative w-24 h-24">
-							<Image
-								src={p.thumbnailUrl}
-								alt={p.name}
-								className="rounded-md"
-								fill
-								objectFit="cover"
-							/>
-						</div>
-						{p.name}
-						<div className="flex gap-2">
-							{p.members.map(
-								(member) =>
-									member && (
-										<div key={member.userId}>
-											<Image
-												src={member.imageUrl}
-												alt={member.userId}
-												width={40}
-												height={40}
-												className="rounded-full"
-											/>
-										</div>
-									),
-							)}
-						</div>
-					</div>
-				))
-			) : (
-				<p>No Projects</p>
-			)}
+			<div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+				{projects.length > 0 ? (
+					projects.map((p) => (
+						<ProjectCard
+							key={p.id}
+							project={{
+								id: p.id,
+								name: p.name,
+								thumbnailUrl: p.thumbnailUrl,
+								members: p.members,
+							}}
+						/>
+					))
+				) : (
+					<p>No Projects</p>
+				)}
+			</div>
 		</>
 	);
 }
