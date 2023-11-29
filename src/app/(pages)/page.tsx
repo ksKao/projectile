@@ -17,13 +17,32 @@ export default async function Home() {
 			{projects.length > 0 ? (
 				projects.map((p) => (
 					<div key={p.id}>
-						<Image
-							src={p.thumbnailUrl}
-							alt={p.name}
-							width={40}
-							height={40}
-						/>
+						<div className="relative w-24 h-24">
+							<Image
+								src={p.thumbnailUrl}
+								alt={p.name}
+								className="rounded-md"
+								fill
+								objectFit="cover"
+							/>
+						</div>
 						{p.name}
+						<div className="flex gap-2">
+							{p.members.map(
+								(member) =>
+									member && (
+										<div key={member.userId}>
+											<Image
+												src={member.imageUrl}
+												alt={member.userId}
+												width={40}
+												height={40}
+												className="rounded-full"
+											/>
+										</div>
+									),
+							)}
+						</div>
 					</div>
 				))
 			) : (

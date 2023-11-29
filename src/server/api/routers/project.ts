@@ -1,3 +1,4 @@
+import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createProjectSchema } from "~/lib/schema";
@@ -89,12 +90,39 @@ export const projectRouter = createTRPCRouter({
 			});
 
 			if (projects.length <= 0)
-				return projects.map((p, i) => {
+				return projects.map((p) => {
 					return {
 						...p,
+						members: [] as {
+							userId: string;
+							imageUrl: string;
+						}[],
 						thumbnailUrl: "",
 					};
 				});
+
+			const members: string[] = [];
+
+			// get a list of member id
+			for (const project of projects) {
+				for (const memberId of project.members) {
+					if (!members.includes(memberId)) {
+						members.push(memberId);
+					}
+				}
+			}
+
+			// use the member id to get a list of users from clerk
+			const memberInfos = (
+				await clerkClient.users.getUserList({
+					userId: members,
+				})
+			).map((user) => {
+				return {
+					userId: user.id,
+					imageUrl: user.imageUrl,
+				};
+			});
 
 			const res = await supabase.storage
 				.from("projects")
@@ -113,6 +141,9 @@ export const projectRouter = createTRPCRouter({
 			return projects.map((p, i) => {
 				return {
 					...p,
+					members: p.members.map((member) =>
+						memberInfos.find((m) => m.userId === member),
+					),
 					thumbnailUrl: res.data?.[i]?.signedUrl ?? "",
 				};
 			});
