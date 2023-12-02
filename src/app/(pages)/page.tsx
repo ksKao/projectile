@@ -13,7 +13,7 @@ export default async function Home() {
 				<h1 className="font-bold text-3xl">My Projects</h1>
 				<CreateProjectModal />
 			</div>
-			{user?.username}
+			{user?.emailAddresses[0]?.emailAddress}
 			<div className="flex flex-col md:flex-row md:flex-wrap gap-4">
 				{projects.length > 0 ? (
 					projects.map((p) => (
@@ -22,6 +22,7 @@ export default async function Home() {
 							project={{
 								id: p.id,
 								name: p.name,
+								dueDate: p.dueDate,
 								thumbnailUrl: p.thumbnailUrl,
 								members: p.members,
 							}}

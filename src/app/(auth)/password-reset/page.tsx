@@ -169,6 +169,7 @@ export default function PasswordResetForm() {
 			<form onSubmit={handleSendPasswordResetCode}>
 				<Input
 					type="text"
+					inputMode="email"
 					id="email"
 					placeholder="Email"
 					label="Email"

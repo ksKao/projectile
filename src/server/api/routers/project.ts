@@ -87,6 +87,9 @@ export const projectRouter = createTRPCRouter({
 						has: ctx.auth.userId,
 					},
 				},
+				orderBy: {
+					dueDate: "asc",
+				},
 			});
 
 			if (projects.length <= 0)

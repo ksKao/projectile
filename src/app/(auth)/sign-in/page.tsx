@@ -72,6 +72,7 @@ export default function SignIn() {
 			<form onSubmit={handleSignIn}>
 				<Input
 					type="text"
+					inputMode="email"
 					id="email"
 					placeholder="Email"
 					label="Email"

@@ -98,6 +98,7 @@ export default function SignUp() {
 				/>
 				<Input
 					type="text"
+					inputMode="email"
 					id="email"
 					placeholder="Email"
 					label="Email"
