@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs";
 import CreateProjectModal from "~/components/create-project-modal";
 import { api } from "~/trpc/server";
 import ProjectCard from "~/components/project-card";
+import Link from "next/link";
 
 export default async function Home() {
 	const projects = await api.project.getAllProjects.query();
@@ -17,16 +18,17 @@ export default async function Home() {
 			<div className="flex flex-col md:flex-row md:flex-wrap gap-4">
 				{projects.length > 0 ? (
 					projects.map((p) => (
-						<ProjectCard
-							key={p.id}
-							project={{
-								id: p.id,
-								name: p.name,
-								dueDate: p.dueDate,
-								thumbnailUrl: p.thumbnailUrl,
-								members: p.members,
-							}}
-						/>
+						<Link href={`/${p.id}`} key={p.id}>
+							<ProjectCard
+								project={{
+									id: p.id,
+									name: p.name,
+									dueDate: p.dueDate,
+									thumbnailUrl: p.thumbnailUrl,
+									members: p.members,
+								}}
+							/>
+						</Link>
 					))
 				) : (
 					<p>No Projects</p>

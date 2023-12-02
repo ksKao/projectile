@@ -157,4 +157,27 @@ export const projectRouter = createTRPCRouter({
 			});
 		}
 	}),
+	getProject: protectedProcedure
+		.input(z.string())
+		.query(async ({ input, ctx }) => {
+			try {
+				const project = await ctx.db.projects.findFirst({
+					where: {
+						id: {
+							equals: input,
+						},
+						members: {
+							has: ctx.auth.userId,
+						},
+					},
+				});
+
+				return project;
+			} catch {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Something went wrong. Please try again later.",
+				});
+			}
+		}),
 });

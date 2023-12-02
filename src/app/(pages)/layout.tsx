@@ -1,6 +1,4 @@
-import dynamic from "next/dynamic";
-
-const Navbar = dynamic(() => import("~/components/navbar"), { ssr: false });
+import Navbar from "~/components/navbar";
 
 export default function PagesLayout({
 	children,
@@ -10,7 +8,9 @@ export default function PagesLayout({
 	return (
 		<>
 			<Navbar />
-			<main className="mx-8 md:mx-12 lg:mx-16">{children}</main>
+			<main className="mx-8 md:mx-12 lg:mx-16 h-[calc(100vh-96px)]">
+				{children}
+			</main>
 		</>
 	);
 }

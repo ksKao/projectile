@@ -77,14 +77,14 @@ export default function ProjectCard({ project }: { project: Project }) {
 						/>
 					</div>
 					<div
-						className="ml-4 flex flex-col justify-between flex-grow"
+						className="ml-4 flex flex-col justify-between flex-grow min-w-0"
 						ref={divRef}
 					>
-						<p className="font-bold text-2xl overflow-ellipsis overflow-hidden whitespace-nowrap max-w-[210px]">
+						<p className="font-bold text-xl overflow-hidden overflow-ellipsis whitespace-nowrap">
 							{project.name}
 						</p>
-						<p className="font-light text-gray-700 dark:text-gray-400 overflow-hidden whitespace-nowrap">
-							{format(project.dueDate, "eee, PPP")}
+						<p className="font-light text-gray-700 dark:text-gray-400 overflow-ellipsis whitespace-nowrap overflow-hidden">
+							{format(project.dueDate, "eee, do MMM yy")}
 						</p>
 						<div className="flex gap-2 mt-6">
 							{membersToRender.map(

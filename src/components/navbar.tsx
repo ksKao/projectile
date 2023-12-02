@@ -15,12 +15,18 @@ import {
 } from "./ui/dropdown-menu";
 import { useTheme } from "next-themes";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
 	const { signOut } = useClerk();
 	const router = useRouter();
 	const { user } = useUser();
 	const { theme, setTheme } = useTheme();
+	const [isClient, setIsClient] = useState(false); // for hydration error
+
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
 
 	return (
 		<nav className="w-screen h-24 bg-background flex justify-between items-center px-8 md:px-12 lg:px-16">
@@ -68,18 +74,20 @@ export default function Navbar() {
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<div className="hidden md:flex items-center gap-2 md:gap-4">
-				<Button
-					onClick={() => {
-						setTheme(theme === "dark" ? "light" : "dark");
-					}}
-					variant="outline"
-				>
-					{theme === "dark" ? (
-						<MdDarkMode className="w-4 h-4" />
-					) : (
-						<MdLightMode className="w-4 h-4" />
-					)}
-				</Button>
+				{isClient && (
+					<Button
+						onClick={() => {
+							setTheme(theme === "dark" ? "light" : "dark");
+						}}
+						variant="outline"
+					>
+						{theme === "dark" ? (
+							<MdDarkMode className="w-4 h-4" />
+						) : (
+							<MdLightMode className="w-4 h-4" />
+						)}
+					</Button>
+				)}
 				<Button
 					onClick={() => router.push("/settings")}
 					variant="outline"
