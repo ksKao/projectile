@@ -39,15 +39,17 @@ model KanbanColumns {
 }
 
 model Tasks {
-    id              String        @id @default(uuid())
-    title           String
-    description     String
     kanbanColumn    KanbanColumns @relation(fields: [kanbanColumnId], references: [id])
     kanbanColumnId  String
+    sortOrder       Int
+    title           String
+    description     String
     assignedMembers String[]
     dueDate         DateTime
     createdAt       DateTime      @default(now())
     updatedAt       DateTime      @updatedAt
+
+    @@id([kanbanColumnId, sortOrder])
 }
 
 model Threads {
