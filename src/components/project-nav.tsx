@@ -6,9 +6,18 @@ import React from "react";
 import { MdViewKanban } from "react-icons/md";
 import { BiSolidDashboard, BiSolidMessageRoundedDetail } from "react-icons/bi";
 import { FaFolder, FaPoll } from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
+import { useUser } from "@clerk/nextjs";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "~/server/api/root";
 
-export default function ProjectNav() {
+export default function ProjectNav({
+	project,
+}: {
+	project: inferRouterOutputs<AppRouter>["project"]["getProject"];
+}) {
 	const pathname = usePathname();
+	const { user } = useUser();
 	const links = [
 		{
 			title: "Dashboard",
@@ -40,7 +49,7 @@ export default function ProjectNav() {
 	const currentLink = pathname.split("/")[2] ?? "";
 
 	return (
-		<nav className="fixed bottom-0 w-screen items-center flex h-[8vh] rounded-t-md justify-around border-t md:static md:items-start md:w-72 md:h-full md:flex-col md:justify-start md:p-8 md:gap-8 md:border-r md:border-t-0 md:rounded-none">
+		<nav className="w-screen bg-background items-center flex h-[8vh] rounded-b-md justify-around border-b md:static md:items-start md:w-72 md:h-full md:flex-col md:justify-start md:p-8 md:gap-8 md:border-r md:border-b-0 md:rounded-none">
 			{links.map((link) => (
 				<Link
 					key={link.href}
@@ -65,6 +74,29 @@ export default function ProjectNav() {
 					</p>
 				</Link>
 			))}
+			{user?.id === project?.leader && (
+				<Link
+					href={`/${projectId}/settings`}
+					className={`flex items-center gap-4 p-1 rounded-sm md:w-full md:p-4 ${
+						"settings" === currentLink ? "bg-primary" : "bg-none"
+					}`}
+				>
+					<span>
+						<FaGear
+							className={`w-6 h-6 ${
+								"settings" === currentLink ? "text-white" : ""
+							}`}
+						/>
+					</span>
+					<p
+						className={`hidden font-semibold md:block ${
+							"settings" === currentLink ? "text-white" : ""
+						}`}
+					>
+						Settings
+					</p>
+				</Link>
+			)}
 		</nav>
 	);
 }

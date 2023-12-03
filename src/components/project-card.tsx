@@ -63,7 +63,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 		<Card className="overflow-hidden w-full md:w-96 max-w-full" ref={ref}>
 			<CardContent className="p-4 w-full">
 				<div className="flex max-w-full">
-					<div className="relative  min-w-[96px] min-h-[96px]">
+					<div className="relative min-w-[96px] min-h-[96px]">
 						{!thumbnailLoaded && (
 							<Skeleton className="rounded-md min-w-[96px] min-h-[96px] absolute" />
 						)}

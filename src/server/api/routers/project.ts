@@ -172,7 +172,40 @@ export const projectRouter = createTRPCRouter({
 					},
 				});
 
-				return project;
+				if (!project) return null;
+
+				const userList = (
+					await clerkClient.users.getUserList({
+						userId: project.members,
+					})
+				).map((u) => {
+					return {
+						id: u.id,
+						username: u.username,
+						imageUrl: u.imageUrl,
+					};
+				});
+
+				const res = await supabase.storage
+					.from("projects")
+					.createSignedUrl(
+						`${project.id}/${project.thumbnailFileName}`,
+						60,
+					);
+
+				if (res.error)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: res.error.message,
+					});
+
+				const thumbnailUrl = res.data.signedUrl;
+
+				return {
+					...project,
+					members: userList,
+					thumbnailUrl,
+				};
 			} catch {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
