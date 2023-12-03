@@ -102,7 +102,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 									),
 							)}
 							{numberOfExtraMembers > 0 && (
-								<div className="bg-primary w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+								<div className="bg-primary w-8 h-8 rounded-full flex items-center justify-center overflow-hidden text-white">
 									+{numberOfExtraMembers}
 								</div>
 							)}
