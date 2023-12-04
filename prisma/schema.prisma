@@ -32,13 +32,17 @@ model KanbanColumns {
     id        String   @id @default(uuid())
     project   Projects @relation(fields: [projectId], references: [id])
     projectId String
+    sortOrder Int
     tasks     Tasks[]
     name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@unique([projectId, sortOrder])
 }
 
 model Tasks {
+    id              String        @id @default(uuid())
     kanbanColumn    KanbanColumns @relation(fields: [kanbanColumnId], references: [id])
     kanbanColumnId  String
     sortOrder       Int
@@ -49,7 +53,7 @@ model Tasks {
     createdAt       DateTime      @default(now())
     updatedAt       DateTime      @updatedAt
 
-    @@id([kanbanColumnId, sortOrder])
+    @@unique([kanbanColumnId, sortOrder])
 }
 
 model Threads {
