@@ -15,9 +15,11 @@ export default async function PagesLayout({
 	if (!project) notFound();
 
 	return (
-		<div className="md:flex -mx-8 md:-mx-12 lg:-mx-16 h-full">
+		<div className="relative flex -mx-8 md:-mx-12 lg:-mx-16 h-full flex-col md:flex-row">
 			<ProjectNav project={project} />
-			<div className="px-8 pt-8 pb-4 w-full md:p-8">{children}</div>
+			<div className="px-8 pt-24 pb-4 w-full md:p-8 flex-grow h-full">
+				{children}
+			</div>
 		</div>
 	);
 }

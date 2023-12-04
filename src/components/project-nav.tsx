@@ -49,7 +49,7 @@ export default function ProjectNav({
 	const currentLink = pathname.split("/")[2] ?? "";
 
 	return (
-		<nav className="w-screen bg-background items-center flex h-[8vh] rounded-b-md justify-around border-b md:static md:items-start md:w-72 md:h-full md:flex-col md:justify-start md:p-8 md:gap-8 md:border-r md:border-b-0 md:rounded-none">
+		<nav className="absolute top-0 left-0 w-screen py-2 bg-background items-center flex h-[8vh] rounded-b-md justify-around border-b md:static md:items-start md:w-72 md:h-full md:flex-col md:justify-start md:p-8 md:gap-8 md:border-r md:border-b-0 md:rounded-none">
 			{links.map((link) => (
 				<Link
 					key={link.href}
