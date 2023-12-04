@@ -67,7 +67,7 @@ export default function Project({
 				</div>
 			</div>
 			<h2 className="text-2xl font-bold mt-8">Members</h2>
-			<ul className="mt-4">
+			<ul className="py-4">
 				{project.members
 					.sort(
 						(a, b) =>
