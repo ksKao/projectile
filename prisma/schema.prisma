@@ -30,7 +30,7 @@ model Projects {
 
 model KanbanColumns {
     id        String   @id @default(uuid())
-    project   Projects @relation(fields: [projectId], references: [id])
+    project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId String
     sortOrder Int
     tasks     Tasks[]
@@ -43,7 +43,7 @@ model KanbanColumns {
 
 model Tasks {
     id              String        @id @default(uuid())
-    kanbanColumn    KanbanColumns @relation(fields: [kanbanColumnId], references: [id])
+    kanbanColumn    KanbanColumns @relation(fields: [kanbanColumnId], references: [id], onDelete: Cascade)
     kanbanColumnId  String
     sortOrder       Int
     title           String
@@ -63,7 +63,7 @@ model Threads {
     replies   ThreadReplies[]
     createdAt DateTime        @default(now())
     updatedAt DateTime        @updatedAt
-    project   Projects        @relation(fields: [projectId], references: [id])
+    project   Projects        @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId String
 }
 
@@ -71,7 +71,7 @@ model ThreadReplies {
     id        String   @id @default(uuid())
     content   String
     author    String
-    thread    Threads  @relation(fields: [threadId], references: [id])
+    thread    Threads  @relation(fields: [threadId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     threadId  String
@@ -79,7 +79,7 @@ model ThreadReplies {
 
 model Files {
     id         String   @id @default(uuid())
-    project    Projects @relation(fields: [projectId], references: [id])
+    project    Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId  String
     fileName   String
     uploadedBy String
@@ -89,7 +89,7 @@ model Files {
 
 model Polls {
     id        String        @id @default(uuid())
-    project   Projects      @relation(fields: [projectId], references: [id])
+    project   Projects      @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId String
     options   PollOptions[]
     dueDate   DateTime
@@ -100,14 +100,14 @@ model Polls {
 model PollOptions {
     id      String  @id @default(uuid())
     title   String
-    Polls   Polls   @relation(fields: [pollsId], references: [id])
+    Polls   Polls   @relation(fields: [pollsId], references: [id], onDelete: Cascade)
     pollsId String
     votes   Votes[]
 }
 
 model Votes {
     userId        String
-    option        PollOptions @relation(fields: [pollOptionsId], references: [id])
+    option        PollOptions @relation(fields: [pollOptionsId], references: [id], onDelete: Cascade)
     pollOptionsId String
 
     @@id([userId, pollOptionsId])
