@@ -7,6 +7,8 @@ import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
 import { useProject } from "~/lib/contexts/projectContext";
 import { useRouter } from "next/navigation";
+import { Popover } from "./ui/popover";
+import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 
 export default function AddColumnButton() {
 	const { mutate, isLoading } = api.kanban.addColumn.useMutation({
@@ -40,50 +42,49 @@ export default function AddColumnButton() {
 	};
 
 	return (
-		<div
-			className={`bg-input h-fit text-center ${
-				editing
-					? ""
-					: "hover:bg-primary-foreground/90 dark:hover:bg-primary-foreground/50"
-			} dark:bg-primary-foreground min-w-[16rem] border dark:border-0 rounded-md text-foreground`}
-		>
-			{editing ? (
-				<div className="p-2">
-					<form onSubmit={addColumn}>
-						<Input
-							placeholder="Column Name"
-							id="columnName"
-							value={columnName}
-							onChange={(e) => setColumnName(e.target.value)}
-						/>
-						<div className="-mt-3 flex justify-start gap-2">
-							<Button
-								className="py-0"
-								type="submit"
-								loading={isLoading}
-							>
-								Add Column
-							</Button>
-							<Button
-								variant="ghost"
-								className="p-2"
-								type="reset"
-								onClick={() => setEditing(false)}
-							>
-								<IoCloseSharp className="h-6 w-6" />
-							</Button>
-						</div>
-					</form>
-				</div>
-			) : (
-				<div
-					className="font-bold p-2"
-					role="button"
-					onClick={() => setEditing(true)}
-				>
-					Add a Column
-				</div>
-			)}
+		<div className="h-fit">
+			<Popover open={editing} onOpenChange={(open) => setEditing(open)}>
+				<PopoverTrigger asChild>
+					<div
+						className="font-bold p-2 min-w-[16rem] text-center hover:bg-primary-foreground/90 dark:hover:bg-primary-foreground/50 dark:bg-primary-foreground rounded-md bg-input"
+						role="button"
+						onClick={() => setEditing(true)}
+					>
+						Add a Column
+					</div>
+				</PopoverTrigger>
+				<PopoverContent className="min-w-[16rem] -mt-10">
+					<div
+						className={`bg-input h-fit text-center dark:bg-primary-foreground min-w-[16rem] border dark:border-0 rounded-md text-foreground p-2`}
+					>
+						<form onSubmit={addColumn}>
+							<Input
+								placeholder="Column Name"
+								id="columnName"
+								value={columnName}
+								onChange={(e) => setColumnName(e.target.value)}
+							/>
+							<div className="-mt-3 flex justify-start gap-2">
+								<Button
+									className="py-0"
+									type="submit"
+									loading={isLoading}
+								>
+									Add Column
+								</Button>
+								<Button
+									variant="ghost"
+									className="p-2"
+									type="reset"
+									onClick={() => setEditing(false)}
+								>
+									<IoCloseSharp className="h-6 w-6" />
+								</Button>
+							</div>
+						</form>
+					</div>
+				</PopoverContent>
+			</Popover>
 		</div>
 	);
 }
