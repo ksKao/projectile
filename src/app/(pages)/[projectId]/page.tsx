@@ -1,37 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
-import { api } from "~/trpc/react";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Skeleton } from "~/components/ui/skeleton";
-import LoadingSpinner from "~/components/ui/loading-spinner";
 import { format } from "date-fns";
 import { FaUserMinus } from "react-icons/fa";
 import { Button } from "~/components/ui/button";
 import { useUser } from "@clerk/nextjs";
+import { useProject } from "~/lib/contexts/projectContext";
 
-export default function Project({
-	params,
-}: {
-	params: {
-		projectId: string;
-	};
-}) {
+export default function Project() {
 	const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
 	const { user } = useUser();
-	const { data: project, isLoading } = api.project.getProject.useQuery(
-		params.projectId,
-	);
+	const project = useProject();
 
-	if (isLoading)
-		return (
-			<div className="w-full h-full flex items-center justify-center">
-				<LoadingSpinner />
-			</div>
-		);
-
-	if (!project) redirect("/");
+	if (!project) notFound();
 
 	return (
 		<>
