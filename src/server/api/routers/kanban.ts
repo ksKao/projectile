@@ -30,9 +30,7 @@ export const kanbanRouter = createTRPCRouter({
 					},
 				});
 
-				const sortOrder = project?.kanbanColumns?.[0]?.sortOrder as
-					| number
-					| undefined;
+				const sortOrder = project?.kanbanColumns?.[0]?.sortOrder;
 
 				if (!project)
 					throw new TRPCError({
