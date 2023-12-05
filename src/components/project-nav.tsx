@@ -8,15 +8,11 @@ import { BiSolidDashboard, BiSolidMessageRoundedDetail } from "react-icons/bi";
 import { FaFolder, FaPoll } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { useUser } from "@clerk/nextjs";
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "~/server/api/root";
+import { useProject } from "~/lib/contexts/projectContext";
 
-export default function ProjectNav({
-	project,
-}: {
-	project: inferRouterOutputs<AppRouter>["project"]["getProject"];
-}) {
+export default function ProjectNav() {
 	const pathname = usePathname();
+	const project = useProject();
 	const { user } = useUser();
 	const links = [
 		{
