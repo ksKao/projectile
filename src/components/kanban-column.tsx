@@ -6,16 +6,51 @@ import { Button } from "./ui/button";
 import { FaPlus } from "react-icons/fa";
 import { Input } from "./ui/input";
 import { IoCloseSharp } from "react-icons/io5";
+import TaskCard from "./task-card";
+import { api } from "~/trpc/react";
+import toast from "react-hot-toast";
+import { useProject } from "~/lib/contexts/projectContext";
+import { useRouter } from "next/navigation";
 
-type Props = inferRouterOutputs<AppRouter>["kanban"]["getColumns"][number];
+type Column = inferRouterOutputs<AppRouter>["kanban"]["getColumns"][number];
 
-function AddCardForm({ setShow }: { setShow: (show: boolean) => void }) {
+function AddCardForm({
+	column,
+	setShow,
+}: {
+	column: Column;
+	setShow: (show: boolean) => void;
+}) {
 	const divRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
+	const project = useProject();
+	const router = useRouter();
+	const { isLoading, mutate } = api.kanban.addTask.useMutation({
+		onSuccess: () => {
+			setCardTitle("");
+			toast.success("A new card has been created");
+			router.refresh();
+		},
+		onError: (e) => {
+			if (e.data?.zodError) {
+				const errors = e.data.zodError.fieldErrors;
+				toast.error(
+					errors?.projectId?.[0] ?? errors?.kanbanColumnId?.[0] ?? "",
+				);
+			} else {
+				toast.error(e.message);
+			}
+		},
+	});
 	const [cardTitle, setCardTitle] = useState("");
 
-	const addCard: React.FormEventHandler<HTMLFormElement> = (e) => {
+	const addTask: React.FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
+		mutate({
+			title: cardTitle,
+			projectId: project?.id ?? "",
+			kanbanColumnId: column.id,
+		});
 		console.log(cardTitle);
 	};
 
@@ -48,7 +83,7 @@ function AddCardForm({ setShow }: { setShow: (show: boolean) => void }) {
 			className="w-full mb-2 bg-primary-foreground dark:bg-slate-800 rounded-md p-2"
 			ref={divRef}
 		>
-			<form onSubmit={addCard}>
+			<form onSubmit={addTask}>
 				<Input
 					type="text"
 					placeholder="Card Title"
@@ -57,7 +92,7 @@ function AddCardForm({ setShow }: { setShow: (show: boolean) => void }) {
 					onChange={(e) => setCardTitle(e.target.value)}
 				/>
 				<div className="-mt-3 flex justify-start gap-2">
-					<Button>Add Card</Button>
+					<Button loading={isLoading}>Add Card</Button>
 					<Button
 						variant="ghost"
 						className="p-2 hover:bg-slate-600/50"
@@ -72,7 +107,7 @@ function AddCardForm({ setShow }: { setShow: (show: boolean) => void }) {
 	);
 }
 
-export default function TaskColumn({ column }: { column: Props }) {
+export default function TaskColumn({ column }: { column: Column }) {
 	const dummyDiv = useRef<HTMLDivElement>(null);
 	const [showForm, setShowForm] = useState(false);
 
@@ -82,12 +117,12 @@ export default function TaskColumn({ column }: { column: Props }) {
 				{column.name}
 			</h2>
 			<div className="flex-grow max-h-[calc(100%-40px-16px)] overflow-y-auto px-2 mt-2">
-				<div className="w-full h-32 mb-2 bg-primary-foreground dark:bg-input"></div>
-				<div className="w-full h-32 mb-2 bg-primary-foreground dark:bg-input"></div>
-				<div className="w-full h-32 mb-2 bg-primary-foreground dark:bg-input"></div>
-				<div className="w-full h-32 mb-2 bg-primary-foreground dark:bg-input"></div>
-				<div className="w-full h-32 mb-2 bg-primary-foreground dark:bg-input"></div>
-				{showForm && <AddCardForm setShow={setShowForm} />}
+				{column.tasks.map((t) => (
+					<TaskCard key={t.id} task={t} />
+				))}
+				{showForm && (
+					<AddCardForm column={column} setShow={setShowForm} />
+				)}
 				<div ref={dummyDiv} className="w-full" />
 			</div>
 			<Button

@@ -36,7 +36,7 @@ export const kanbanRouter = createTRPCRouter({
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message:
-							"Only member of this project can add a new column",
+							"Project does not exist, or you do not have permission.",
 					});
 
 				await ctx.db.kanbanColumns.create({
@@ -68,7 +68,11 @@ export const kanbanRouter = createTRPCRouter({
 					include: {
 						kanbanColumns: {
 							include: {
-								tasks: {},
+								tasks: {
+									orderBy: {
+										sortOrder: "asc",
+									},
+								},
 							},
 							orderBy: {
 								sortOrder: "desc",
@@ -81,7 +85,7 @@ export const kanbanRouter = createTRPCRouter({
 					throw new TRPCError({
 						code: "UNAUTHORIZED",
 						message:
-							"Only member of this project can view the task board",
+							"Project does not exist, or you do not have permission.",
 					});
 
 				return project.kanbanColumns;
@@ -90,6 +94,72 @@ export const kanbanRouter = createTRPCRouter({
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Something went wrong. Please try again later",
+				});
+			}
+		}),
+	addTask: protectedProcedure
+		.input(
+			z.object({
+				title: z.string().min(1, "Card title is required"),
+				projectId: z.string().uuid("Invalid project ID"),
+				kanbanColumnId: z.string().uuid("Invalid Kanban column ID"),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			try {
+				// check if user is member of group
+				const project = await ctx.db.projects.findFirst({
+					where: {
+						id: {
+							equals: input.projectId,
+						},
+						members: {
+							has: ctx.auth.userId,
+						},
+					},
+					include: {
+						kanbanColumns: {
+							where: {
+								id: input.kanbanColumnId,
+							},
+							include: {
+								tasks: {
+									orderBy: {
+										sortOrder: "desc",
+									},
+								},
+							},
+						},
+					},
+				});
+
+				if (!project)
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message:
+							"Project does not exist, or you do not have permission.",
+					});
+
+				if (!project.kanbanColumns?.[0])
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "Kanban column does not exist.",
+					});
+
+				const sortOrder =
+					(project.kanbanColumns[0].tasks?.[0]?.sortOrder ?? 0) + 1;
+
+				await ctx.db.tasks.create({
+					data: {
+						title: input.title,
+						kanbanColumnId: input.kanbanColumnId,
+						sortOrder,
+					},
+				});
+			} catch {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Something went wrong. Please try again later.",
 				});
 			}
 		}),

@@ -47,9 +47,9 @@ model Tasks {
     kanbanColumnId  String
     sortOrder       Int
     title           String
-    description     String
+    description     String?
     assignedMembers String[]
-    dueDate         DateTime
+    dueDate         DateTime?
     createdAt       DateTime      @default(now())
     updatedAt       DateTime      @updatedAt
 
