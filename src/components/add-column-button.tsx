@@ -5,12 +5,16 @@ import { Input } from "./ui/input";
 import { IoCloseSharp } from "react-icons/io5";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
+import { useProject } from "~/lib/contexts/projectContext";
+import { useRouter } from "next/navigation";
 
 export default function AddColumnButton() {
 	const { mutate, isLoading } = api.kanban.addColumn.useMutation({
 		onSuccess: () => {
 			setColumnName("");
 			setEditing(false);
+			toast.success("A new column has been added");
+			router.refresh();
 		},
 		onError: (e) => {
 			if (e.data?.zodError) {
@@ -21,6 +25,8 @@ export default function AddColumnButton() {
 			}
 		},
 	});
+	const project = useProject();
+	const router = useRouter();
 	const [editing, setEditing] = useState(false);
 	const [columnName, setColumnName] = useState("");
 
@@ -28,15 +34,21 @@ export default function AddColumnButton() {
 		e.preventDefault();
 
 		mutate({
-			name: "kjasdf",
-			projectId: "",
+			name: columnName,
+			projectId: project?.id ?? "",
 		});
 	};
 
 	return (
-		<div className="bg-input h-fit text-center hover:bg-primary-foreground/90 dark:hover:bg-primary-foreground/50 dark:bg-primary-foreground min-w-[16rem] p-2 border dark:border-0 rounded-md text-foreground">
+		<div
+			className={`bg-input h-fit text-center ${
+				editing
+					? ""
+					: "hover:bg-primary-foreground/90 dark:hover:bg-primary-foreground/50"
+			} dark:bg-primary-foreground min-w-[16rem] border dark:border-0 rounded-md text-foreground`}
+		>
 			{editing ? (
-				<div>
+				<div className="p-2">
 					<form onSubmit={addColumn}>
 						<Input
 							placeholder="Column Name"
@@ -65,7 +77,7 @@ export default function AddColumnButton() {
 				</div>
 			) : (
 				<div
-					className="font-bold"
+					className="font-bold p-2"
 					role="button"
 					onClick={() => setEditing(true)}
 				>
