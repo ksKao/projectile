@@ -12,9 +12,9 @@ export default function PagesLayout({
 }) {
 	return (
 		<ProjectProvider projectId={params.projectId}>
-			<div className="relative flex -mx-8 md:-mx-12 lg:-mx-16 h-full flex-col md:flex-row overflow-x-auto">
+			<div className="flex -mx-8 md:-mx-12 lg:-mx-16 h-full flex-col md:flex-row overflow-x-auto">
 				<ProjectNav />
-				<div className="px-8 pt-24 pb-4 w-full md:p-8 flex-grow h-full">
+				<div className="px-8 py-4 w-full md:p-8 flex-grow h-[calc(100%-8svh)]">
 					{children}
 				</div>
 			</div>
