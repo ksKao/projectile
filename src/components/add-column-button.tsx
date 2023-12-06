@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { IoCloseSharp } from "react-icons/io5";
@@ -28,6 +28,7 @@ export default function AddColumnButton() {
 		},
 	});
 	const project = useProject();
+	const divRef = useRef<HTMLDivElement>(null);
 	const router = useRouter();
 	const [editing, setEditing] = useState(false);
 	const [columnName, setColumnName] = useState("");
@@ -48,7 +49,11 @@ export default function AddColumnButton() {
 					<div
 						className="font-bold p-2 min-w-[16rem] text-center hover:bg-primary-foreground/90 dark:hover:bg-primary-foreground/50 dark:bg-primary-foreground rounded-md bg-input"
 						role="button"
-						onClick={() => setEditing(true)}
+						ref={divRef}
+						onClick={() => {
+							divRef.current?.scrollIntoView();
+							setEditing(true);
+						}}
 					>
 						Add a Column
 					</div>

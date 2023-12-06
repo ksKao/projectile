@@ -11,6 +11,7 @@ import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
 import { useProject } from "~/lib/contexts/projectContext";
 import { useRouter } from "next/navigation";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
 
 type Column = inferRouterOutputs<AppRouter>["kanban"]["getColumns"][number];
 
@@ -138,7 +139,13 @@ function AddCardForm({
 	);
 }
 
-export default function KanbanColumn({ column }: { column: Column }) {
+export default function KanbanColumn({
+	column,
+	index,
+}: {
+	column: Column;
+	index: number;
+}) {
 	const dummyDiv = useRef<HTMLDivElement>(null);
 	const [showForm, setShowForm] = useState(false);
 	const [orderedData, setOrderedData] = useState<Column>(column);
@@ -148,38 +155,67 @@ export default function KanbanColumn({ column }: { column: Column }) {
 	}, [column]);
 
 	return (
-		<div className="flex flex-col min-w-[16rem] h-fit max-h-full bg-input dark:bg-primary-foreground w-64 pb-2 border dark:border-0 rounded-md overflow-y-hidden">
-			<h2 className="font-bold p-2 whitespace-nowrap max-w-full overflow-ellipsis overflow-hidden">
-				{orderedData.name}
-			</h2>
-			<div className="flex-grow max-h-[calc(100%-40px-16px)] overflow-y-auto px-2 mt-2">
-				{orderedData.tasks.map((t) => (
-					<TaskCard key={t.id} task={t} />
-				))}
-				{showForm && (
-					<AddCardForm
-						column={orderedData}
-						setShow={setShowForm}
-						setOrderedData={setOrderedData}
-					/>
-				)}
-				<div ref={dummyDiv} className="w-full" />
-			</div>
-			<Button
-				variant="ghost"
-				className={`m-2 mb-0 px-2 font-semibold justify-start ${
-					showForm ? "hidden" : ""
-				}`}
-				onClick={() => {
-					setShowForm(true);
-					dummyDiv.current?.scrollIntoView({
-						behavior: "smooth",
-						block: "end",
-					});
-				}}
-			>
-				<FaPlus className="mr-2" /> Add a card
-			</Button>
-		</div>
+		<Draggable draggableId={column.id} index={index}>
+			{(provided) => {
+				return (
+					<div
+						{...provided.draggableProps}
+						{...provided.dragHandleProps}
+						ref={provided.innerRef}
+						className="flex flex-col min-w-[16rem] h-fit max-h-full bg-input dark:bg-primary-foreground w-64 pb-2 border dark:border-0 rounded-md overflow-y-hidden"
+					>
+						<h2 className="font-bold p-2 whitespace-nowrap max-w-full overflow-ellipsis overflow-hidden">
+							{orderedData.name}
+						</h2>
+						<Droppable droppableId={column.id} type="card">
+							{(provided) => {
+								return (
+									<div
+										{...provided.droppableProps}
+										ref={provided.innerRef}
+										className="flex-grow max-h-[calc(100%-40px-16px)] overflow-y-auto px-2 mt-2"
+									>
+										{orderedData.tasks.map((t, i) => (
+											<TaskCard
+												key={t.id}
+												task={t}
+												index={i}
+											/>
+										))}
+										{provided.placeholder}
+										{showForm && (
+											<AddCardForm
+												column={orderedData}
+												setShow={setShowForm}
+												setOrderedData={setOrderedData}
+											/>
+										)}
+										<div
+											ref={dummyDiv}
+											className="w-full"
+										/>
+									</div>
+								);
+							}}
+						</Droppable>
+						<Button
+							variant="ghost"
+							className={`m-2 mb-0 px-2 font-semibold justify-start ${
+								showForm ? "hidden" : ""
+							}`}
+							onClick={() => {
+								setShowForm(true);
+								dummyDiv.current?.scrollIntoView({
+									behavior: "smooth",
+									block: "end",
+								});
+							}}
+						>
+							<FaPlus className="mr-2" /> Add a card
+						</Button>
+					</div>
+				);
+			}}
+		</Draggable>
 	);
 }
