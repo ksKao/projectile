@@ -36,6 +36,8 @@ export default function AddColumnButton() {
 	const addColumn: React.FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
 
+		if (!columnName) return;
+
 		mutate({
 			name: columnName,
 			projectId: project?.id ?? "",

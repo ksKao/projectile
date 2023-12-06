@@ -23,7 +23,7 @@ export default function Project() {
 			<div className="flex flex-col md:flex-row mt-4">
 				<div className="relative w-36 h-36">
 					{!thumbnailLoaded && (
-						<Skeleton className="rounded-md w-36 h-36 absolute" />
+						<Skeleton className="rounded-md w-36 h-36 absolute -z-10" />
 					)}
 					<Image
 						src={project.thumbnailUrl}

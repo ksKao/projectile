@@ -18,17 +18,18 @@ type Column = inferRouterOutputs<AppRouter>["kanban"]["getColumns"][number];
 function AddCardForm({
 	column,
 	setShow,
-	setOrderedData,
 }: {
 	column: Column;
 	setShow: (show: boolean) => void;
-	setOrderedData: React.Dispatch<React.SetStateAction<Column>>;
 }) {
 	const divRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const project = useProject();
 	const router = useRouter();
-	const { mutate } = api.kanban.addTask.useMutation({
+	const { isLoading, mutate } = api.kanban.addTask.useMutation({
+		onSuccess: () => {
+			toast.success("A new card has been added");
+		},
 		onError: (e) => {
 			if (e.data?.zodError) {
 				const errors = e.data.zodError.fieldErrors;
@@ -38,51 +39,24 @@ function AddCardForm({
 			} else {
 				toast.error(e.message);
 			}
+		},
+		onSettled: () => {
+			inputRef.current?.focus();
 			router.refresh();
 		},
-		onSettled: () => router.refresh(),
 	});
 	const [cardTitle, setCardTitle] = useState("");
 
 	const addTask: React.FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
-		const newData = {
+		if (!cardTitle) return;
+
+		mutate({
 			id: crypto.randomUUID(),
 			title: cardTitle,
 			projectId: project?.id ?? "",
 			kanbanColumnId: column.id,
-		};
-		mutate(newData);
-
-		// optimistic update
-		setOrderedData((prev) => {
-			const newTasks = Array.from(prev.tasks);
-
-			const max =
-				newTasks.length > 0
-					? newTasks.reduce(function (prev, current) {
-							return prev && prev.sortOrder > current.sortOrder
-								? prev
-								: current;
-					  }).sortOrder
-					: 0;
-
-			newTasks.push({
-				...newData,
-				assignedMembers: [] as string[],
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				dueDate: null,
-				description: null,
-				sortOrder: max + 1,
-			});
-
-			return {
-				...prev,
-				tasks: newTasks,
-			};
 		});
-
 		setCardTitle("");
 	};
 
@@ -112,21 +86,25 @@ function AddCardForm({
 
 	return (
 		<div
-			className="w-full mb-2 bg-primary-foreground dark:bg-slate-800 rounded-md p-2"
+			className={`w-full mb-2 bg-primary-foreground dark:bg-slate-800 ${
+				isLoading ? "opacity-50" : ""
+			} rounded-md p-2`}
 			ref={divRef}
 		>
 			<form onSubmit={addTask}>
 				<Input
 					type="text"
+					disabled={isLoading}
 					placeholder="Card Title"
 					ref={inputRef}
 					value={cardTitle}
 					onChange={(e) => setCardTitle(e.target.value)}
 				/>
 				<div className="-mt-3 flex justify-start gap-2">
-					<Button>Add Card</Button>
+					<Button disabled={isLoading}>Add Card</Button>
 					<Button
 						variant="ghost"
+						disabled={isLoading}
 						className="p-2 hover:bg-slate-600/50"
 						type="reset"
 						onClick={() => setShow(false)}
@@ -148,11 +126,6 @@ export default function KanbanColumn({
 }) {
 	const dummyDiv = useRef<HTMLDivElement>(null);
 	const [showForm, setShowForm] = useState(false);
-	const [orderedData, setOrderedData] = useState<Column>(column);
-
-	useEffect(() => {
-		setOrderedData(column);
-	}, [column]);
 
 	return (
 		<Draggable draggableId={column.id} index={index}>
@@ -162,10 +135,10 @@ export default function KanbanColumn({
 						{...provided.draggableProps}
 						{...provided.dragHandleProps}
 						ref={provided.innerRef}
-						className="flex flex-col min-w-[16rem] h-fit max-h-full bg-input dark:bg-primary-foreground w-64 pb-2 border dark:border-0 rounded-md overflow-y-hidden"
+						className="flex flex-col min-w-[16rem] h-fit max-h-full bg-input dark:bg-primary-foreground w-64 pb-2 border dark:border-0 rounded-md overflow-hidden"
 					>
 						<h2 className="font-bold p-2 whitespace-nowrap max-w-full overflow-ellipsis overflow-hidden">
-							{orderedData.name}
+							{column.name}
 						</h2>
 						<Droppable droppableId={column.id} type="card">
 							{(provided) => {
@@ -173,9 +146,9 @@ export default function KanbanColumn({
 									<div
 										{...provided.droppableProps}
 										ref={provided.innerRef}
-										className="flex-grow max-h-[calc(100%-40px-16px)] overflow-y-auto px-2 mt-2"
+										className="flex-grow max-h-[calc(100%-40px-16px)] overflow-auto px-2 mt-2"
 									>
-										{orderedData.tasks.map((t, i) => (
+										{column.tasks.map((t, i) => (
 											<TaskCard
 												key={t.id}
 												task={t}
@@ -185,9 +158,8 @@ export default function KanbanColumn({
 										{provided.placeholder}
 										{showForm && (
 											<AddCardForm
-												column={orderedData}
+												column={column}
 												setShow={setShowForm}
-												setOrderedData={setOrderedData}
 											/>
 										)}
 										<div
