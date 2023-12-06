@@ -6,17 +6,17 @@ import { IoCloseSharp } from "react-icons/io5";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
 import { useProject } from "~/lib/contexts/projectContext";
-import { useRouter } from "next/navigation";
 import { Popover } from "@/components/ui/popover";
 import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 
 export default function AddColumnButton() {
+	const utils = api.useUtils();
 	const { mutate, isLoading } = api.kanban.addColumn.useMutation({
-		onSuccess: () => {
+		onSuccess: async () => {
 			setColumnName("");
 			setEditing(false);
 			toast.success("A new column has been added");
-			router.refresh();
+			await utils.kanban.getColumns.invalidate();
 		},
 		onError: (e) => {
 			if (e.data?.zodError) {
@@ -29,7 +29,6 @@ export default function AddColumnButton() {
 	});
 	const project = useProject();
 	const divRef = useRef<HTMLDivElement>(null);
-	const router = useRouter();
 	const [editing, setEditing] = useState(false);
 	const [columnName, setColumnName] = useState("");
 

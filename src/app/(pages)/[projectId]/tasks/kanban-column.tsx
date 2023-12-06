@@ -10,7 +10,6 @@ import TaskCard from "./task-card";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
 import { useProject } from "~/lib/contexts/projectContext";
-import { useRouter } from "next/navigation";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 
 type Column = inferRouterOutputs<AppRouter>["kanban"]["getColumns"][number];
@@ -25,7 +24,7 @@ function AddCardForm({
 	const divRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const project = useProject();
-	const router = useRouter();
+	const utils = api.useUtils();
 	const { isLoading, mutate } = api.kanban.addTask.useMutation({
 		onSuccess: () => {
 			toast.success("A new card has been added");
@@ -40,9 +39,12 @@ function AddCardForm({
 				toast.error(e.message);
 			}
 		},
-		onSettled: () => {
-			inputRef.current?.focus();
-			router.refresh();
+		onSettled: async () => {
+			if (inputRef.current) {
+				inputRef.current.disabled = false;
+				inputRef.current.focus();
+			}
+			await utils.kanban.getColumns.invalidate();
 		},
 	});
 	const [cardTitle, setCardTitle] = useState("");
