@@ -27,7 +27,7 @@ function AddCardForm({
 	const inputRef = useRef<HTMLInputElement>(null);
 	const project = useProject();
 	const router = useRouter();
-	const { isLoading, mutate } = api.kanban.addTask.useMutation({
+	const { mutate } = api.kanban.addTask.useMutation({
 		onError: (e) => {
 			if (e.data?.zodError) {
 				const errors = e.data.zodError.fieldErrors;
@@ -107,7 +107,7 @@ function AddCardForm({
 		return () => {
 			document.removeEventListener("click", handleClickOutside);
 		};
-	}, [setShow]); // Empty dependency array ensures the effect runs only once during mount and unmount
+	}, [setShow]);
 
 	return (
 		<div
@@ -123,7 +123,7 @@ function AddCardForm({
 					onChange={(e) => setCardTitle(e.target.value)}
 				/>
 				<div className="-mt-3 flex justify-start gap-2">
-					<Button loading={isLoading}>Add Card</Button>
+					<Button>Add Card</Button>
 					<Button
 						variant="ghost"
 						className="p-2 hover:bg-slate-600/50"
