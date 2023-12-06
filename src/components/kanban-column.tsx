@@ -120,9 +120,11 @@ function AddCardForm({
 export default function KanbanColumn({
 	column,
 	index,
+	isLoading,
 }: {
 	column: Column;
 	index: number;
+	isLoading: boolean;
 }) {
 	const dummyDiv = useRef<HTMLDivElement>(null);
 	const [showForm, setShowForm] = useState(false);
@@ -140,7 +142,11 @@ export default function KanbanColumn({
 						<h2 className="font-bold p-2 whitespace-nowrap max-w-full overflow-ellipsis overflow-hidden">
 							{column.name}
 						</h2>
-						<Droppable droppableId={column.id} type="card">
+						<Droppable
+							droppableId={column.id}
+							type="card"
+							isDropDisabled={isLoading}
+						>
 							{(provided) => {
 								return (
 									<div

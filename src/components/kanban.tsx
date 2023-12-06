@@ -32,19 +32,22 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 		},
 		onSettled: () => router.refresh(),
 	});
-	const { mutate: moveTask } = api.kanban.updateTaskOrder.useMutation({
-		onError: (e) => {
-			if (e.data?.zodError) {
-				const errors = e.data.zodError.fieldErrors;
-				toast.error(
-					errors?.sortedColumns?.[0] ?? errors?.projectId?.[0] ?? "",
-				);
-			} else {
-				toast.error(e.message);
-			}
-		},
-		onSettled: () => router.refresh(),
-	});
+	const { isLoading, mutate: updateTaskOrder } =
+		api.kanban.updateTaskOrder.useMutation({
+			onError: (e) => {
+				if (e.data?.zodError) {
+					const errors = e.data.zodError.fieldErrors;
+					toast.error(
+						errors?.sortedColumns?.[0] ??
+							errors?.projectId?.[0] ??
+							"",
+					);
+				} else {
+					toast.error(e.message);
+				}
+			},
+			onSettled: () => router.refresh(),
+		});
 	const router = useRouter();
 	const project = useProject();
 
@@ -118,7 +121,7 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 				sourceColumn.tasks = reorderedTasks;
 
 				setOrderedData(newOrderedData);
-				moveTask({
+				updateTaskOrder({
 					projectId: project?.id ?? "",
 					tasks: reorderedTasks.map((t) => {
 						return {
@@ -148,7 +151,7 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 				});
 
 				setOrderedData(newOrderedData);
-				moveTask({
+				updateTaskOrder({
 					projectId: project?.id ?? "",
 					tasks: [
 						...sourceColumn.tasks.map((t) => {
@@ -180,7 +183,12 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 						ref={provided.innerRef}
 					>
 						{orderedData.map((c, i) => (
-							<KanbanColumn key={c.id} index={i} column={c} />
+							<KanbanColumn
+								key={c.id}
+								index={i}
+								column={c}
+								isLoading={isLoading}
+							/>
 						))}
 						{provided.placeholder}
 						<AddColumnButton />

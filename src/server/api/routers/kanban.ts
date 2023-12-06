@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { Prisma } from "@prisma/client";
 
 export const kanbanRouter = createTRPCRouter({
 	addColumn: protectedProcedure
@@ -211,7 +212,10 @@ export const kanbanRouter = createTRPCRouter({
 					}),
 				);
 
-				await ctx.db.$transaction(transaction);
+				await ctx.db.$transaction(transaction, {
+					isolationLevel:
+						Prisma.TransactionIsolationLevel.Serializable,
+				});
 			} catch (e) {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
@@ -268,7 +272,10 @@ export const kanbanRouter = createTRPCRouter({
 					}),
 				);
 
-				await ctx.db.$transaction(transaction);
+				await ctx.db.$transaction(transaction, {
+					isolationLevel:
+						Prisma.TransactionIsolationLevel.Serializable,
+				});
 			} catch {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
