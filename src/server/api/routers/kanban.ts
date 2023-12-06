@@ -100,6 +100,7 @@ export const kanbanRouter = createTRPCRouter({
 	addTask: protectedProcedure
 		.input(
 			z.object({
+				id: z.string().uuid("Invalid card ID"),
 				title: z.string().min(1, "Card title is required"),
 				projectId: z.string().uuid("Invalid project ID"),
 				kanbanColumnId: z.string().uuid("Invalid Kanban column ID"),
