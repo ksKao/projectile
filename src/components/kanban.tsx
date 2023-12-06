@@ -11,7 +11,6 @@ import KanbanColumn from "./kanban-column";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "~/server/api/root";
 import { api } from "~/trpc/react";
-import { useRouter } from "next/navigation";
 import { useProject } from "~/lib/contexts/projectContext";
 import toast from "react-hot-toast";
 
@@ -30,7 +29,9 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 				toast.error(e.message);
 			}
 		},
-		onSettled: () => router.refresh(),
+		onSettled: async () => {
+			await utils.kanban.getColumns.invalidate();
+		},
 	});
 	const { isLoading, mutate: updateTaskOrder } =
 		api.kanban.updateTaskOrder.useMutation({
@@ -46,9 +47,13 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 					toast.error(e.message);
 				}
 			},
-			onSettled: () => router.refresh(),
+			onSettled: async () => {
+				// router.refresh();
+				await utils.kanban.getColumns.invalidate();
+			},
 		});
-	const router = useRouter();
+	const utils = api.useUtils();
+	// const router = useRouter();
 	const project = useProject();
 
 	useEffect(() => {

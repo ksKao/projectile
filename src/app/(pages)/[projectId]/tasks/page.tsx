@@ -1,13 +1,27 @@
+"use client";
 import React from "react";
 import Kanban from "~/components/kanban";
-import { api } from "~/trpc/server";
+import LoadingSpinner from "~/components/ui/loading-spinner";
+import { api } from "~/trpc/react";
 
-export default async function TasksPage({
+export default function TasksPage({
 	params,
 }: {
 	params: { projectId: string };
 }) {
-	const columns = await api.kanban.getColumns.query(params.projectId);
+	const {
+		isLoading,
+		isError,
+		data: columns,
+	} = api.kanban.getColumns.useQuery(params.projectId);
+
+	if (isLoading)
+		return (
+			<div className="w-full h-full flex items-center justify-center">
+				<LoadingSpinner />
+			</div>
+		);
+	if (isError) throw new Error();
 
 	return (
 		<div className="max-h-full h-full">
