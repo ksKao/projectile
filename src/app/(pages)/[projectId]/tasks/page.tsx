@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Kanban from "~/components/kanban";
+import Kanban from "./kanban";
 import LoadingSpinner from "~/components/ui/loading-spinner";
 import { api } from "~/trpc/react";
 

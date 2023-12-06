@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ProjectNav from "~/components/project-nav";
+import ProjectNav from "./project-nav";
 import { ProjectProvider } from "~/lib/contexts/projectContext";
 import { api } from "~/trpc/server";
 

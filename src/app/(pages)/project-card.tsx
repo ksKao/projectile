@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { Card, CardContent } from "./ui/card";
-import { Skeleton } from "./ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import useResizeObserver from "use-resize-observer";
 import { format } from "date-fns";
 

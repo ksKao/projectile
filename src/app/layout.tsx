@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeProvider } from "~/components/theme-provider";
+import { ThemeProvider } from "./theme-provider";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 

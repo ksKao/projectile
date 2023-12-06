@@ -2,9 +2,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "~/server/api/root";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { FaPlus } from "react-icons/fa";
-import { Input } from "./ui/input";
+import { Input } from "@/components/ui/input";
 import { IoCloseSharp } from "react-icons/io5";
 import TaskCard from "./task-card";
 import { api } from "~/trpc/react";

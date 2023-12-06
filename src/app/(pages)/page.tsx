@@ -1,7 +1,7 @@
 import { currentUser } from "@clerk/nextjs";
-import CreateProjectModal from "~/components/create-project-modal";
+import CreateProjectModal from "./create-project-modal";
 import { api } from "~/trpc/server";
-import ProjectCard from "~/components/project-card";
+import ProjectCard from "./project-card";
 import Link from "next/link";
 
 export default async function Home() {

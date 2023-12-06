@@ -3,7 +3,7 @@ import { useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import EmailVerification from "~/components/email-verification";
+import EmailVerification from "./email-verification";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { signUpSchema } from "~/lib/schema";

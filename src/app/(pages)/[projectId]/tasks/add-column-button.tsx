@@ -1,13 +1,13 @@
 "use client";
 import React, { useRef, useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { IoCloseSharp } from "react-icons/io5";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
 import { useProject } from "~/lib/contexts/projectContext";
 import { useRouter } from "next/navigation";
-import { Popover } from "./ui/popover";
+import { Popover } from "@/components/ui/popover";
 import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 
 export default function AddColumnButton() {
