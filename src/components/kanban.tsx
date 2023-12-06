@@ -10,11 +10,43 @@ import AddColumnButton from "./add-column-button";
 import KanbanColumn from "./kanban-column";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "~/server/api/root";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
+import { useProject } from "~/lib/contexts/projectContext";
+import toast from "react-hot-toast";
 
 type Column = inferRouterOutputs<AppRouter>["kanban"]["getColumns"][number];
 
 export default function Kanban({ columns }: { columns: Column[] }) {
 	const [orderedData, setOrderedData] = useState(columns);
+	const { mutate: sortColumn } = api.kanban.sortColumn.useMutation({
+		onError: (e) => {
+			if (e.data?.zodError) {
+				const errors = e.data.zodError.fieldErrors;
+				toast.error(
+					errors?.sortedColumns?.[0] ?? errors?.projectId?.[0] ?? "",
+				);
+			} else {
+				toast.error(e.message);
+			}
+		},
+		onSettled: () => router.refresh(),
+	});
+	const { mutate: moveTask } = api.kanban.updateTaskOrder.useMutation({
+		onError: (e) => {
+			if (e.data?.zodError) {
+				const errors = e.data.zodError.fieldErrors;
+				toast.error(
+					errors?.sortedColumns?.[0] ?? errors?.projectId?.[0] ?? "",
+				);
+			} else {
+				toast.error(e.message);
+			}
+		},
+		onSettled: () => router.refresh(),
+	});
+	const router = useRouter();
+	const project = useProject();
 
 	useEffect(() => {
 		setOrderedData(columns);
@@ -24,11 +56,6 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 		const result = Array.from(list);
 		const [removed] = result.splice(startIndex, 1);
 		removed && result.splice(endIndex, 0, removed);
-		// if (removed) {
-		// 	result.splice(endIndex, 0, removed);
-		// } else {
-		// 	result.splice(endIndex, 0);
-		// }
 
 		return result;
 	}
@@ -56,7 +83,12 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 				sortOrder: index,
 			}));
 			setOrderedData(items);
-			// TODO: call db
+			sortColumn({
+				projectId: project?.id ?? "",
+				sortedColumns: items.map((i) => {
+					return { ...i };
+				}),
+			});
 		}
 
 		if (type === "card") {
@@ -86,7 +118,14 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 				sourceColumn.tasks = reorderedTasks;
 
 				setOrderedData(newOrderedData);
-				// TODO call db
+				moveTask({
+					projectId: project?.id ?? "",
+					tasks: reorderedTasks.map((t) => {
+						return {
+							...t,
+						};
+					}),
+				});
 			} else {
 				// Moving card to a different column
 				// Remove card from source column
@@ -104,8 +143,26 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 					task.sortOrder = i;
 				});
 
+				destColumn.tasks.forEach((task, i) => {
+					task.sortOrder = i;
+				});
+
 				setOrderedData(newOrderedData);
-				// TODO call db
+				moveTask({
+					projectId: project?.id ?? "",
+					tasks: [
+						...sourceColumn.tasks.map((t) => {
+							return {
+								...t,
+							};
+						}),
+						...destColumn.tasks.map((t) => {
+							return {
+								...t,
+							};
+						}),
+					],
+				});
 			}
 		}
 	};

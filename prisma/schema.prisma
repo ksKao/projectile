@@ -37,8 +37,6 @@ model KanbanColumns {
     name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-
-    @@unique([projectId, sortOrder])
 }
 
 model Tasks {
@@ -52,8 +50,6 @@ model Tasks {
     dueDate         DateTime?
     createdAt       DateTime      @default(now())
     updatedAt       DateTime      @updatedAt
-
-    @@unique([kanbanColumnId, sortOrder])
 }
 
 model Threads {
