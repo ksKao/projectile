@@ -44,7 +44,7 @@ function AssignedMembers({
 	const project = useProject();
 	const utils = api.useUtils();
 	const { isLoading, mutate } = api.kanban.addMemberToTask.useMutation({
-		onSuccess: () => toast.success("Member has been assigned."),
+		onSuccess: (message) => toast.success(message),
 		onError: (e) => toast.error(e.message),
 		onSettled: () => utils.kanban.getColumns.invalidate(),
 	});
@@ -69,7 +69,17 @@ function AssignedMembers({
 					if (!member) return null;
 					return (
 						<li key={m}>
-							<Avatar className="w-9 h-9">
+							<Avatar
+								className="w-9 h-9"
+								role="button"
+								onClick={() =>
+									mutate({
+										userId: m,
+										taskId,
+										action: "remove",
+									})
+								}
+							>
 								<AvatarImage src={member.imageUrl} />
 							</Avatar>
 						</li>
@@ -89,7 +99,18 @@ function AssignedMembers({
 								);
 								if (!member) return null;
 								return (
-									<Avatar key={m} className="w-9 h-9">
+									<Avatar
+										key={m}
+										className="w-9 h-9"
+										role="button"
+										onClick={() =>
+											mutate({
+												userId: m,
+												taskId,
+												action: "remove",
+											})
+										}
+									>
 										<AvatarImage src={member.imageUrl} />
 									</Avatar>
 								);
@@ -118,6 +139,7 @@ function AssignedMembers({
 									mutate({
 										userId: remainingMember.id,
 										taskId,
+										action: "add",
 									});
 								}}
 								disabled={isLoading}

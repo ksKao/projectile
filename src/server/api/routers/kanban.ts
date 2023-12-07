@@ -284,6 +284,10 @@ export const kanbanRouter = createTRPCRouter({
 			z.object({
 				userId: z.string().min(1, "User ID is required"),
 				taskId: z.string().uuid("Invalid task ID"),
+				action: z.enum(["add", "remove"], {
+					invalid_type_error: "Invalid action",
+					required_error: "Action is required",
+				}),
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
@@ -323,22 +327,45 @@ export const kanbanRouter = createTRPCRouter({
 						code: "UNAUTHORIZED",
 						message: "You are not authorized to modify this task",
 					});
-				else if (task.assignedMembers.includes(input.userId))
+				else if (
+					input.action === "add" &&
+					task.assignedMembers.includes(input.userId)
+				)
 					throw new TRPCError({
 						code: "BAD_REQUEST",
 						message: "This member is already assigned to the task",
 					});
+				else if (
+					input.action === "remove" &&
+					!task.assignedMembers.includes(input.userId)
+				)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "This member is not assigned to the task",
+					});
+
+				let newMembers = task.assignedMembers;
+
+				if (input.action === "add") {
+					newMembers.push(input.userId);
+				} else {
+					newMembers = newMembers.filter((m) => m !== input.userId);
+				}
 
 				await ctx.db.tasks.update({
 					data: {
 						assignedMembers: {
-							push: input.userId,
+							set: newMembers,
 						},
 					},
 					where: {
 						id: input.taskId,
 					},
 				});
+
+				return input.action === "add"
+					? "Member added succesfully"
+					: "Member removed successfully";
 			} catch (e) {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
