@@ -33,6 +33,7 @@ import { IoCalendarClear } from "react-icons/io5";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
 import LoadingSpinner from "~/components/ui/loading-spinner";
+import { IoClose } from "react-icons/io5";
 
 function AssignedMembers({
 	members,
@@ -43,11 +44,12 @@ function AssignedMembers({
 }) {
 	const project = useProject();
 	const utils = api.useUtils();
-	const { isLoading, mutate } = api.kanban.addMemberToTask.useMutation({
-		onSuccess: (message) => toast.success(message),
-		onError: (e) => toast.error(e.message),
-		onSettled: () => utils.kanban.getColumns.invalidate(),
-	});
+	const { isLoading, mutate } =
+		api.kanban.modifyTaskAssignedMember.useMutation({
+			onSuccess: (message) => toast.success(message),
+			onError: (e) => toast.error(e.message),
+			onSettled: () => utils.kanban.getColumns.invalidate(),
+		});
 
 	if (!project) notFound();
 
@@ -125,7 +127,7 @@ function AssignedMembers({
 								{isLoading ? (
 									<LoadingSpinner className="w-6 h-6" />
 								) : (
-									<FaUserPlus />
+									<FaUserPlus className="w-5 h-5" />
 								)}
 							</button>
 						)}
@@ -162,20 +164,37 @@ function AssignedMembers({
 	);
 }
 
-function ProjectDueDate({ projectDueDate }: { projectDueDate: Date | null }) {
+function ProjectDueDate({
+	dueDate: defaultDueDate,
+	taskId,
+}: {
+	dueDate: Date | null;
+	taskId: string;
+}) {
 	const [calendarOpen, setCalendarOpen] = useState(false);
-	const [dueDate, setDueDate] = useState(projectDueDate);
+	const [dueDate, setDueDate] = useState(defaultDueDate);
+	const utils = api.useUtils();
+	const { isLoading, mutate } = api.kanban.modifyTaskDueDate.useMutation({
+		onSuccess: () => toast.success("Due date modified successfully"),
+		onError: (e) =>
+			toast.error(
+				e.data?.zodError?.fieldErrors?.dueDate?.[0] ??
+					e.data?.zodError?.fieldErrors?.taskId?.[0] ??
+					e.message,
+			),
+		onSettled: () => utils.kanban.getColumns.invalidate(),
+	});
 
 	return (
 		<div>
 			<p className="text-muted-foreground">Task Due Date</p>
-			<Popover
-				modal
-				open={calendarOpen}
-				onOpenChange={(isOpen) => setCalendarOpen(isOpen)}
-			>
-				<PopoverTrigger asChild>
-					<div>
+			<div className="flex items-end gap-2">
+				<Popover
+					modal
+					open={calendarOpen}
+					onOpenChange={(isOpen) => setCalendarOpen(isOpen)}
+				>
+					<PopoverTrigger asChild disabled={isLoading}>
 						<Button
 							variant="outline"
 							className="w-56 text-left font-normal flex justify-between mt-2 gap-4"
@@ -186,21 +205,44 @@ function ProjectDueDate({ projectDueDate }: { projectDueDate: Date | null }) {
 									? format(dueDate, "PPP")
 									: "No due date"}
 							</span>
-							<IoCalendarClear />
+							{isLoading ? (
+								<LoadingSpinner className="w-4 h-4" />
+							) : (
+								<IoCalendarClear />
+							)}
 						</Button>
-					</div>
-				</PopoverTrigger>
-				<PopoverContent className="w-auto p-0">
-					<Calendar
-						mode="single"
-						selected={dueDate ?? undefined}
-						onSelect={(d) => {
-							setDueDate(d ?? null);
-							setCalendarOpen(false);
-						}}
-					/>
-				</PopoverContent>
-			</Popover>
+					</PopoverTrigger>
+					<PopoverContent className="w-auto p-0">
+						<Calendar
+							mode="single"
+							selected={dueDate ?? undefined}
+							onSelect={(d) => {
+								setDueDate(d ?? null);
+								mutate({
+									dueDate: d ?? null,
+									taskId,
+								});
+								setCalendarOpen(false);
+							}}
+						/>
+					</PopoverContent>
+				</Popover>
+				<Button
+					variant="outline"
+					onClick={() => {
+						if (dueDate !== null) {
+							setDueDate(null);
+							mutate({
+								taskId,
+								dueDate: null,
+							});
+						}
+					}}
+					className={isLoading ? "opacity-0" : ""}
+				>
+					<IoClose />
+				</Button>
+			</div>
 		</div>
 	);
 }
@@ -232,7 +274,7 @@ export default function TaskCard({
 								{task.title}
 							</div>
 						</DialogTrigger>
-						<DialogContent className="max-w-[90vw] rounded-md md:w-[50vw]">
+						<DialogContent className="max-w-[90vw] rounded-md md:w-fit">
 							<DialogHeader className="flex flex-row items-center space-y-0 my-2 gap-4 min-w-0">
 								<span>
 									<BiTask className="w-7 h-7" />
@@ -246,7 +288,10 @@ export default function TaskCard({
 									members={task.assignedMembers}
 									taskId={task.id}
 								/>
-								<ProjectDueDate projectDueDate={task.dueDate} />
+								<ProjectDueDate
+									dueDate={task.dueDate}
+									taskId={task.id}
+								/>
 							</div>
 						</DialogContent>
 					</Dialog>
