@@ -16,6 +16,8 @@ import {
 import { useTheme } from "next-themes";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { useEffect, useState } from "react";
+import { Avatar } from "~/components/ui/avatar";
+import { AvatarImage } from "@radix-ui/react-avatar";
 
 export default function Navbar() {
 	const { signOut } = useClerk();
@@ -37,13 +39,12 @@ export default function Navbar() {
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild className="block md:hidden">
 					{user ? (
-						<Image
-							src={user.imageUrl ?? ""}
-							alt="User Profile Picture"
-							width={36}
-							height={36}
-							className="rounded-full"
-						/>
+						<Avatar className="w-9 h-9">
+							<AvatarImage
+								src={user.imageUrl}
+								alt={user.username ?? user.id}
+							/>
+						</Avatar>
 					) : (
 						<Skeleton className="w-9 h-9 rounded-full" />
 					)}
@@ -96,13 +97,12 @@ export default function Navbar() {
 				</Button>
 
 				{user ? (
-					<Image
-						src={user.imageUrl ?? ""}
-						alt="User Profile Picture"
-						width={36}
-						height={36}
-						className="rounded-full"
-					/>
+					<Avatar className="w-9 h-9">
+						<AvatarImage
+							src={user.imageUrl}
+							alt={user.username ?? user.id}
+						/>
+					</Avatar>
 				) : (
 					<Skeleton className="w-9 h-9 rounded-full" />
 				)}

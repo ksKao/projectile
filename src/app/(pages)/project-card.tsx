@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import useResizeObserver from "use-resize-observer";
 import { format } from "date-fns";
+import { Avatar, AvatarImage } from "~/components/ui/avatar";
 
 type Member =
 	| {
@@ -80,7 +81,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 						className="ml-4 flex flex-col justify-between flex-grow min-w-0"
 						ref={divRef}
 					>
-						<p className="font-bold text-xl overflow-hidden overflow-ellipsis whitespace-nowrap">
+						<p className="font-bold text-xl truncate">
 							{project.name}
 						</p>
 						<p className="font-light text-gray-700 dark:text-gray-400 overflow-ellipsis whitespace-nowrap overflow-hidden">
@@ -91,18 +92,17 @@ export default function ProjectCard({ project }: { project: Project }) {
 								(member) =>
 									member && (
 										<div key={member.userId}>
-											<Image
-												src={member.imageUrl}
-												alt={member.userId}
-												width={32}
-												height={32}
-												className="rounded-full min-w-[32px] min-h-[32px]"
-											/>
+											<Avatar className="w-9 h-9">
+												<AvatarImage
+													src={member.imageUrl}
+													alt={member.userId}
+												/>
+											</Avatar>
 										</div>
 									),
 							)}
 							{numberOfExtraMembers > 0 && (
-								<div className="bg-primary w-8 h-8 rounded-full flex items-center justify-center overflow-hidden text-white">
+								<div className="bg-primary w-9 h-9 rounded-full flex items-center justify-center overflow-hidden text-white">
 									+{numberOfExtraMembers}
 								</div>
 							)}
