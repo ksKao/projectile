@@ -61,9 +61,9 @@ export default function TaskCard({
 										{task.assignedMembers
 											.slice(
 												0,
-												task.assignedMembers.length > 5
-													? 4
-													: 5,
+												task.assignedMembers.length > 7
+													? 6
+													: 7,
 											)
 											.map((m) => {
 												const member =
@@ -84,11 +84,11 @@ export default function TaskCard({
 													</li>
 												);
 											})}
-										{task.assignedMembers.length > 5 && (
+										{task.assignedMembers.length > 7 && (
 											<li className="bg-primary w-8 h-8 rounded-full flex items-center justify-center overflow-hidden text-white cursor-pointer">
 												+
 												{task.assignedMembers.length -
-													4}
+													6}
 											</li>
 										)}
 									</ul>

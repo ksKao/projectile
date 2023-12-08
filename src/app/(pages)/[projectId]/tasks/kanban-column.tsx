@@ -139,7 +139,7 @@ export default function KanbanColumn({
 						{...provided.draggableProps}
 						{...provided.dragHandleProps}
 						ref={provided.innerRef}
-						className="flex flex-col min-w-[16rem] h-fit max-h-full bg-input dark:bg-primary-foreground w-64 pb-2 border dark:border-0 rounded-md overflow-hidden"
+						className="flex flex-col min-w-[20rem] h-fit max-h-full bg-input dark:bg-primary-foreground w-80 pb-2 border dark:border-0 rounded-md overflow-hidden"
 					>
 						<h2 className="font-bold p-2 whitespace-nowrap max-w-full overflow-ellipsis overflow-hidden">
 							{column.name}

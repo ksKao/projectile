@@ -48,7 +48,7 @@ export default function AddColumnButton() {
 			<Popover open={editing} onOpenChange={(open) => setEditing(open)}>
 				<PopoverTrigger asChild>
 					<div
-						className="font-bold p-2 min-w-[16rem] text-center hover:bg-primary-foreground/90 dark:hover:bg-primary-foreground/50 dark:bg-primary-foreground rounded-md bg-input"
+						className="font-bold p-2 min-w-[20rem] text-center hover:bg-primary-foreground/90 dark:hover:bg-primary-foreground/50 dark:bg-primary-foreground rounded-md bg-input"
 						role="button"
 						ref={divRef}
 						onClick={() => {
@@ -59,7 +59,7 @@ export default function AddColumnButton() {
 						Add a Column
 					</div>
 				</PopoverTrigger>
-				<PopoverContent className="min-w-[16rem] -mt-10">
+				<PopoverContent className="min-w-[20rem] -mt-10">
 					<div
 						className={`bg-input h-fit text-center dark:bg-primary-foreground min-w-[16rem] border dark:border-0 rounded-md text-foreground p-2`}
 					>
