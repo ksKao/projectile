@@ -56,7 +56,7 @@ export default function TaskCard({
 										)}
 									</p>
 								)}
-								{task.assignedMembers && (
+								{task.assignedMembers.length > 0 && (
 									<ul className="flex gap-2 mt-2">
 										{task.assignedMembers
 											.slice(
@@ -118,9 +118,15 @@ export default function TaskCard({
 								<span>
 									<TbFileDescription className="w-7 h-7" />
 								</span>
-								<h2 className="text-xl font-bold truncate">
+								<h2 className="text-lg font-semibold truncate">
 									Description
 								</h2>
+							</div>
+							<div
+								role="button"
+								className="w-full bg-muted hover:bg-muted/70 p-4 rounded-md"
+							>
+								<p>Add a description...</p>
 							</div>
 						</DialogContent>
 					</Dialog>
