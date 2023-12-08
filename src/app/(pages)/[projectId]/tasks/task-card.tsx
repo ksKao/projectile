@@ -115,6 +115,7 @@ export default function TaskCard({
 								/>
 							</div>
 							<TaskDescription
+								taskId={task.id}
 								taskDescription={task.description}
 							/>
 						</DialogContent>

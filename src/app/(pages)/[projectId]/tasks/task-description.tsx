@@ -1,14 +1,26 @@
 "use client";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { TbFileDescription } from "react-icons/tb";
 import Tiptap from "~/components/tiptap";
+import { api } from "~/trpc/react";
 
 export default function TaskDescription({
+	taskId,
 	taskDescription,
 }: {
+	taskId: string;
 	taskDescription: string;
 }) {
+	const utils = api.useUtils();
+	const { mutate } = api.kanban.modifyTaskDescription.useMutation({
+		onSuccess: () => toast.success("Task description updated successfully"),
+		onError: (e) =>
+			toast.error(e.data?.zodError?.fieldErrors.taskId?.[0] ?? e.message),
+		onSettled: () => utils.kanban.getColumns.invalidate(),
+	});
 	const [showEditor, setShowEditor] = useState(taskDescription.length !== 0);
+	const [editable, setEditable] = useState(false);
 
 	return (
 		<>
@@ -20,8 +32,14 @@ export default function TaskDescription({
 			</div>
 			{showEditor ? (
 				<Tiptap
-					save={() => {
-						console.log("mutate");
+					editable={editable}
+					setEditable={setEditable}
+					setShowEditor={setShowEditor}
+					save={(description) => {
+						mutate({
+							taskId,
+							description,
+						});
 					}}
 					content={taskDescription}
 				/>
@@ -29,7 +47,10 @@ export default function TaskDescription({
 				<div
 					role="button"
 					className="w-full bg-muted hover:bg-muted/70 p-4 rounded-md"
-					onClick={() => setShowEditor(true)}
+					onClick={() => {
+						setShowEditor(true);
+						setEditable(true);
+					}}
 				>
 					<p>Add a description...</p>
 				</div>
