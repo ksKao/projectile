@@ -13,9 +13,9 @@ import { notFound } from "next/navigation";
 import { Avatar } from "~/components/ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { formatDistanceStrict } from "date-fns";
-import { TbFileDescription } from "react-icons/tb";
 import TaskDueDatePicker from "./task-due-date-picker";
 import TaskAssignedMembers from "./task-assigned-members";
+import TaskDescription from "./task-description";
 
 export default function TaskCard({
 	task,
@@ -114,20 +114,9 @@ export default function TaskCard({
 									taskId={task.id}
 								/>
 							</div>
-							<div className="flex flex-row items-center space-y-0 my-2 gap-4 min-w-0 mt-4">
-								<span>
-									<TbFileDescription className="w-7 h-7" />
-								</span>
-								<h2 className="text-lg font-semibold truncate">
-									Description
-								</h2>
-							</div>
-							<div
-								role="button"
-								className="w-full bg-muted hover:bg-muted/70 p-4 rounded-md"
-							>
-								<p>Add a description...</p>
-							</div>
+							<TaskDescription
+								taskDescription={task.description}
+							/>
 						</DialogContent>
 					</Dialog>
 				);

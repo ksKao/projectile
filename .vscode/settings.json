@@ -1,3 +1,4 @@
 {
-	"explorer.sortOrder": "filesFirst"
+	"explorer.sortOrder": "filesFirst",
+	"tailwindCSS.experimental.classRegex": ["class:\\s*?[\"'`]([^\"'`]*).*?,"]
 }
