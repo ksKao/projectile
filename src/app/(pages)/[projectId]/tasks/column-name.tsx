@@ -39,10 +39,11 @@ export default function ColumnName({
 					value={newColumnName}
 					onChange={(e) => setNewColumnName(e.target.value)}
 					onBlur={() => {
-						mutate({
-							columnId,
-							name: newColumnName,
-						});
+						if (newColumnName !== columnName)
+							mutate({
+								columnId,
+								name: newColumnName,
+							});
 						setEditing(false);
 					}}
 				/>

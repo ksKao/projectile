@@ -181,7 +181,6 @@ export const kanbanRouter = createTRPCRouter({
 				});
 			}
 		}),
-
 	addTask: protectedProcedure
 		.input(
 			z.object({
@@ -555,6 +554,58 @@ export const kanbanRouter = createTRPCRouter({
 				await ctx.db.tasks.update({
 					data: {
 						description: input.description,
+					},
+					where: {
+						id: input.taskId,
+					},
+				});
+			} catch {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Something went wrong. Please try again later",
+				});
+			}
+		}),
+	modifyTaskTitle: protectedProcedure
+		.input(
+			z.object({
+				taskId: z.string().uuid("Invalid task ID"),
+				title: z.string().min(1, "Task title is required"),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			try {
+				const task = await ctx.db.tasks.findFirst({
+					include: {
+						kanbanColumn: {
+							select: {
+								project: true,
+							},
+						},
+					},
+					where: {
+						id: {
+							equals: input.taskId,
+						},
+					},
+				});
+
+				if (!task)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "This task does not exist",
+					});
+				if (
+					!task.kanbanColumn.project.members.includes(ctx.auth.userId)
+				)
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "You are not authorized to modify this task",
+					});
+
+				await ctx.db.tasks.update({
+					data: {
+						title: input.title,
 					},
 					where: {
 						id: input.taskId,

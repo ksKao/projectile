@@ -12,7 +12,7 @@ export interface InputProps
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
 	({ className, type, errorMessage = "", label, ...props }, ref) => {
 		return (
-			<div className="grid w-full max-w-sm items-center gap-1.5">
+			<div className="grid w-full items-center gap-1.5">
 				{label && <Label htmlFor={props.id}>{label}</Label>}
 				<div>
 					<input

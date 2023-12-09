@@ -7,7 +7,6 @@ import {
 	DialogHeader,
 	DialogTrigger,
 } from "~/components/ui/dialog";
-import { BiTask } from "react-icons/bi";
 import { useProject } from "~/lib/contexts/projectContext";
 import { notFound } from "next/navigation";
 import { Avatar } from "~/components/ui/avatar";
@@ -16,6 +15,7 @@ import { formatDistanceStrict } from "date-fns";
 import TaskDueDatePicker from "./task-due-date-picker";
 import TaskAssignedMembers from "./task-assigned-members";
 import TaskDescription from "./task-description";
+import TaskTitle from "./task-title";
 
 export default function TaskCard({
 	task,
@@ -96,13 +96,11 @@ export default function TaskCard({
 							</div>
 						</DialogTrigger>
 						<DialogContent className="max-w-[90vw] rounded-md md:w-fit">
-							<DialogHeader className="flex flex-row items-center space-y-0 my-2 gap-4 min-w-0">
-								<span>
-									<BiTask className="w-7 h-7" />
-								</span>
-								<h2 className="text-xl font-bold truncate">
-									{task.title}
-								</h2>
+							<DialogHeader className="min-w-0 my-2">
+								<TaskTitle
+									taskId={task.id}
+									taskTitle={task.title}
+								/>
 							</DialogHeader>
 							<div className="flex items-top gap-4 flex-col md:flex-row md:gap-8">
 								<TaskAssignedMembers
