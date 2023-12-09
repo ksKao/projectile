@@ -222,7 +222,9 @@ export const projectRouter = createTRPCRouter({
 		)
 		.mutation(async ({ input, ctx }) => {
 			try {
+				// if new leader is the same as the current leader, return
 				if (input.newLeaderId === ctx.auth.userId) return;
+
 				const project = await ctx.db.projects.findFirst({
 					where: {
 						id: input.projectId,
@@ -240,8 +242,6 @@ export const projectRouter = createTRPCRouter({
 						message: "Only group leader can transfer leadership.",
 					});
 
-				// if new leader is the same as the current leader, return
-
 				await ctx.db.projects.update({
 					data: {
 						leader: input.newLeaderId,
@@ -251,6 +251,70 @@ export const projectRouter = createTRPCRouter({
 					},
 				});
 			} catch {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Something went wrong. Please try again later.",
+				});
+			}
+		}),
+	removeMember: protectedProcedure
+		.input(
+			z.object({
+				projectId: z.string().uuid("Invalid project ID"),
+				removeMemberId: z.string(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			try {
+				const project = await ctx.db.projects.findFirst({
+					where: {
+						id: input.projectId,
+					},
+				});
+
+				if (!project)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "Project does not exist.",
+					});
+
+				if (project.members.length <= 1)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message:
+							"There must be at least one member in the group. Please delete the group instead.",
+					});
+
+				// if removed user is not this user and is not leader
+				if (
+					project.leader !== ctx.auth.userId &&
+					input.removeMemberId !== ctx.auth.userId
+				)
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Only project leader can remove other members",
+					});
+
+				const newMembers = project.members.filter(
+					(m) => m !== input.removeMemberId,
+				);
+				const newLeader = newMembers.includes(project.leader)
+					? project.leader
+					: newMembers[0];
+
+				await ctx.db.projects.update({
+					data: {
+						members: {
+							set: newMembers,
+						},
+						leader: newLeader,
+					},
+					where: {
+						id: input.projectId,
+					},
+				});
+			} catch (e) {
+				if (e instanceof TRPCError) throw new TRPCError(e);
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Something went wrong. Please try again later.",

@@ -22,6 +22,14 @@ export default function Project() {
 	const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
 	const { user } = useUser();
 	const utils = api.useUtils();
+	const removeMutation = api.project.removeMember.useMutation({
+		onSuccess: () => toast.success("Member has been removed"),
+		onError: (e) =>
+			toast.error(
+				e.data?.zodError?.fieldErrors.projectId?.[0] ?? e.message,
+			),
+		onSettled: () => utils.project.getProject.refetch(),
+	});
 	const reassignMutation = api.project.reassignLeader.useMutation({
 		onSuccess: () => toast.success("The leader has been reassigned"),
 		onError: (e) =>
@@ -40,9 +48,9 @@ export default function Project() {
 		<>
 			<h1 className="text-2xl font-bold">Project Dashboard</h1>
 			<div className="flex flex-col md:flex-row mt-4">
-				<div className="relative w-36 h-36">
+				<div className="relative min-w-[9rem] min-h-[9rem] w-36 h-36">
 					{!thumbnailLoaded && (
-						<Skeleton className="rounded-md w-36 h-36 absolute -z-10" />
+						<Skeleton className="rounded-md min-w-[9rem] min-h-[9rem] absolute -z-10" />
 					)}
 					<Image
 						src={project.thumbnailUrl}
@@ -101,7 +109,8 @@ export default function Project() {
 										<DropdownMenuTrigger asChild>
 											<Button
 												loading={
-													reassignMutation.isLoading
+													reassignMutation.isLoading ||
+													removeMutation.isLoading
 												}
 											>
 												<FaEllipsisH />
@@ -110,7 +119,8 @@ export default function Project() {
 										<DropdownMenuContent align="end">
 											<DropdownMenuItem
 												disabled={
-													reassignMutation.isLoading
+													reassignMutation.isLoading ||
+													removeMutation.isLoading
 												}
 												onSelect={() => {
 													reassignMutation.mutate({
@@ -123,8 +133,15 @@ export default function Project() {
 											</DropdownMenuItem>
 											<DropdownMenuItem
 												disabled={
-													reassignMutation.isLoading
+													reassignMutation.isLoading ||
+													removeMutation.isLoading
 												}
+												onSelect={() => {
+													removeMutation.mutate({
+														projectId: project.id,
+														removeMemberId: m.id,
+													});
+												}}
 											>
 												Remove Member
 											</DropdownMenuItem>
