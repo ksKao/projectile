@@ -213,4 +213,48 @@ export const projectRouter = createTRPCRouter({
 				});
 			}
 		}),
+	reassignLeader: protectedProcedure
+		.input(
+			z.object({
+				projectId: z.string().uuid("Invalid project ID"),
+				newLeaderId: z.string(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			try {
+				if (input.newLeaderId === ctx.auth.userId) return;
+				const project = await ctx.db.projects.findFirst({
+					where: {
+						id: input.projectId,
+					},
+				});
+				if (!project)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "Project does not exist.",
+					});
+
+				if (project.leader !== ctx.auth.userId)
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Only group leader can transfer leadership.",
+					});
+
+				// if new leader is the same as the current leader, return
+
+				await ctx.db.projects.update({
+					data: {
+						leader: input.newLeaderId,
+					},
+					where: {
+						id: input.projectId,
+					},
+				});
+			} catch {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Something went wrong. Please try again later.",
+				});
+			}
+		}),
 });

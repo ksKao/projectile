@@ -5,14 +5,33 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Skeleton } from "~/components/ui/skeleton";
 import { format } from "date-fns";
-import { FaUserMinus } from "react-icons/fa";
 import { Button } from "~/components/ui/button";
 import { useUser } from "@clerk/nextjs";
 import { useProject } from "~/lib/contexts/projectContext";
+import {
+	DropdownMenu,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+} from "~/components/ui/dropdown-menu";
+import { FaEllipsisH } from "react-icons/fa";
+import { api } from "~/trpc/react";
+import toast from "react-hot-toast";
 
 export default function Project() {
 	const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
 	const { user } = useUser();
+	const utils = api.useUtils();
+	const reassignMutation = api.project.reassignLeader.useMutation({
+		onSuccess: () => toast.success("The leader has been reassigned"),
+		onError: (e) =>
+			toast.error(
+				e.data?.zodError?.fieldErrors.newLeaderId?.[0] ??
+					e.data?.zodError?.fieldErrors.projectId?.[0] ??
+					e.message,
+			),
+		onSettled: () => utils.project.getProject.refetch(),
+	});
 	const project = useProject();
 
 	if (!project) notFound();
@@ -59,7 +78,7 @@ export default function Project() {
 					)
 					.map((m) => (
 						<li key={m.id} className="flex mb-4 justify-between">
-							<div className="flex gap-4 items-center">
+							<div className="flex gap-4 items-center flex-grow min-w-0">
 								<Image
 									src={m.imageUrl}
 									alt={m.username ?? m.id}
@@ -67,7 +86,7 @@ export default function Project() {
 									height={40}
 									className="rounded-full"
 								/>
-								<p>
+								<p className="truncate">
 									{m.username}{" "}
 									{project.leader === m.id && (
 										<span className="font-light">
@@ -78,9 +97,39 @@ export default function Project() {
 							</div>
 							{project.leader === user?.id &&
 								m.id !== user.id && (
-									<Button variant="destructive">
-										<FaUserMinus />
-									</Button>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												loading={
+													reassignMutation.isLoading
+												}
+											>
+												<FaEllipsisH />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem
+												disabled={
+													reassignMutation.isLoading
+												}
+												onSelect={() => {
+													reassignMutation.mutate({
+														projectId: project.id,
+														newLeaderId: m.id,
+													});
+												}}
+											>
+												Make Leader
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												disabled={
+													reassignMutation.isLoading
+												}
+											>
+												Remove Member
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
 								)}
 						</li>
 					))}
