@@ -56,12 +56,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		ref,
 	) => {
 		const Comp = asChild ? Slot : "button";
+		const { disabled, ...restProps } = props;
 		return (
 			<Comp
 				className={cn(buttonVariants({ variant, size, className }))}
 				ref={ref}
-				disabled={loading ? true : props.disabled}
-				{...props}
+				disabled={loading || disabled}
+				{...restProps}
 			>
 				{loading ? (
 					<LoadingSpinner className="h-auto w-auto" />

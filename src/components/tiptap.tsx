@@ -11,6 +11,7 @@ type Props = {
 	editable: boolean;
 	setEditable: (editable: boolean) => void;
 	setShowEditor?: (showEditor: boolean) => void;
+	isSubmitting: boolean;
 	save: (data: string) => void;
 	content: string;
 	children?: ReactNode;
@@ -43,6 +44,7 @@ export default function Tiptap({
 	editable,
 	setEditable,
 	setShowEditor,
+	isSubmitting,
 	save,
 	content,
 }: Props) {
@@ -51,7 +53,7 @@ export default function Tiptap({
 		content,
 		editorProps: {
 			attributes: {
-				class: "prose dark:prose-invert prose-base p-2 rounded-b-md border-input border focus:outline-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+				class: "prose dark:prose-invert prose-base p-2 rounded-md border-input border focus:outline-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 			},
 		},
 		editable,
@@ -74,15 +76,17 @@ export default function Tiptap({
 			{editable && (
 				<div className="flex gap-2">
 					<Button
+						className="w-20"
 						onClick={() => {
 							save(editor.getHTML());
-							setEditable(false);
 						}}
+						loading={isSubmitting}
 						disabled={editor.getHTML() === content}
 					>
 						Save
 					</Button>
 					<Button
+						className="w-20"
 						variant="outline"
 						onClick={() => {
 							setEditable(false);
