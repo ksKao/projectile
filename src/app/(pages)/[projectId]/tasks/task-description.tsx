@@ -3,6 +3,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { TbFileDescription } from "react-icons/tb";
 import Tiptap from "~/components/tiptap";
+import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
 export default function TaskDescription({
@@ -27,11 +28,24 @@ export default function TaskDescription({
 
 	return (
 		<>
-			<div className="flex flex-row items-center space-y-0 my-2 gap-4 min-w-0 mt-4">
-				<span>
-					<TbFileDescription className="w-7 h-7" />
-				</span>
-				<h2 className="text-lg font-semibold truncate">Description</h2>
+			<div className="flex justify-between w-full items-center mb-2 mt-4">
+				<div className="flex flex-row items-center space-y-0 gap-4 min-w-0">
+					<span>
+						<TbFileDescription className="w-7 h-7" />
+					</span>
+					<h2 className="text-lg font-semibold truncate">
+						Description
+					</h2>
+				</div>
+				<Button
+					onClick={() => {
+						setEditable(true);
+						setShowEditor(true);
+					}}
+					className={editable ? "invisible" : ""}
+				>
+					Edit
+				</Button>
 			</div>
 			{showEditor ? (
 				<Tiptap
