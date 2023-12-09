@@ -1,123 +1,23 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "~/server/api/root";
 import { Button } from "@/components/ui/button";
-import { FaPlus } from "react-icons/fa";
-import { Input } from "@/components/ui/input";
-import { IoCloseSharp } from "react-icons/io5";
+import { FaPlus, FaTrash } from "react-icons/fa";
 import TaskCard from "./task-card";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
+import ColumnName from "./column-name";
+import AddCardForm from "./add-card-form";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTrigger,
+} from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
-import { useProject } from "~/lib/contexts/projectContext";
-import { Draggable, Droppable } from "@hello-pangea/dnd";
 
 type Column = inferRouterOutputs<AppRouter>["kanban"]["getColumns"][number];
-
-function AddCardForm({
-	column,
-	setShow,
-}: {
-	column: Column;
-	setShow: (show: boolean) => void;
-}) {
-	const divRef = useRef<HTMLDivElement>(null);
-	const inputRef = useRef<HTMLInputElement>(null);
-	const project = useProject();
-	const utils = api.useUtils();
-	const { isLoading, mutate } = api.kanban.addTask.useMutation({
-		onSuccess: () => {
-			toast.success("A new card has been added");
-		},
-		onError: (e) => {
-			if (e.data?.zodError) {
-				const errors = e.data.zodError.fieldErrors;
-				toast.error(
-					errors?.projectId?.[0] ?? errors?.kanbanColumnId?.[0] ?? "",
-				);
-			} else {
-				toast.error(e.message);
-			}
-		},
-		onSettled: async () => {
-			if (inputRef.current) {
-				inputRef.current.disabled = false;
-				inputRef.current.focus();
-			}
-			await utils.kanban.getColumns.invalidate();
-		},
-	});
-	const [cardTitle, setCardTitle] = useState("");
-
-	const addTask: React.FormEventHandler<HTMLFormElement> = (e) => {
-		e.preventDefault();
-		if (!cardTitle) return;
-
-		mutate({
-			id: crypto.randomUUID(),
-			title: cardTitle,
-			projectId: project?.id ?? "",
-			kanbanColumnId: column.id,
-		});
-		setCardTitle("");
-	};
-
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			// Check if the clicked element is outside the div
-			if (
-				divRef.current &&
-				!divRef.current.contains(event.target as Node)
-			) {
-				setCardTitle("");
-				setShow(false);
-			}
-		};
-
-		// Attach the event listener when the component mounts
-		document.addEventListener("click", handleClickOutside);
-
-		divRef.current?.scrollIntoView();
-		inputRef.current?.focus();
-
-		// Clean up the event listener when the component unmounts
-		return () => {
-			document.removeEventListener("click", handleClickOutside);
-		};
-	}, [setShow]);
-
-	return (
-		<div
-			className={`w-full mb-2 bg-primary-foreground dark:bg-slate-800 ${
-				isLoading ? "opacity-50" : ""
-			} rounded-md p-2`}
-			ref={divRef}
-		>
-			<form onSubmit={addTask}>
-				<Input
-					type="text"
-					disabled={isLoading}
-					placeholder="Card Title"
-					ref={inputRef}
-					value={cardTitle}
-					onChange={(e) => setCardTitle(e.target.value)}
-				/>
-				<div className="-mt-3 flex justify-start gap-2">
-					<Button disabled={isLoading}>Add Card</Button>
-					<Button
-						variant="ghost"
-						disabled={isLoading}
-						className="p-2 hover:bg-slate-600/50"
-						type="reset"
-						onClick={() => setShow(false)}
-					>
-						<IoCloseSharp className="h-6 w-6" />
-					</Button>
-				</div>
-			</form>
-		</div>
-	);
-}
 
 export default function KanbanColumn({
 	column,
@@ -130,6 +30,19 @@ export default function KanbanColumn({
 }) {
 	const dummyDiv = useRef<HTMLDivElement>(null);
 	const [showForm, setShowForm] = useState(false);
+	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+	const utils = api.useUtils();
+	const { isLoading: isDeleting, mutate } =
+		api.kanban.deleteColumn.useMutation({
+			onSuccess: () => {
+				toast.success("Column has been deleted");
+				setShowDeleteConfirmation(false);
+			},
+			onError: (e) => {
+				toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message);
+			},
+			onSettled: () => utils.kanban.getColumns.invalidate(),
+		});
 
 	return (
 		<Draggable draggableId={column.id} index={index}>
@@ -141,9 +54,49 @@ export default function KanbanColumn({
 						ref={provided.innerRef}
 						className="flex flex-col min-w-[20rem] h-fit max-h-full bg-input dark:bg-primary-foreground w-80 pb-2 border dark:border-0 rounded-md overflow-hidden"
 					>
-						<h2 className="font-bold p-2 whitespace-nowrap max-w-full overflow-ellipsis overflow-hidden">
-							{column.name}
-						</h2>
+						<div className="flex items-center p-2 gap-2">
+							<ColumnName
+								columnId={column.id}
+								columnName={column.name}
+							/>
+							<Dialog
+								open={showDeleteConfirmation}
+								onOpenChange={setShowDeleteConfirmation}
+							>
+								<DialogTrigger asChild>
+									<Button variant="ghost">
+										<FaTrash className="w-4 h-4" />
+									</Button>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogHeader className="font-bold text-lg">
+										Confirm Delete
+									</DialogHeader>
+									Are you sure that you want to delete this
+									column? All tasks under this column will
+									also be deleted.
+									<div className="w-full flex justify-end items-center gap-2">
+										<Button
+											variant="ghost"
+											onClick={() =>
+												setShowDeleteConfirmation(false)
+											}
+										>
+											Cancel
+										</Button>
+										<Button
+											variant="destructive"
+											onClick={() => {
+												mutate(column.id);
+											}}
+											loading={isDeleting}
+										>
+											Delete
+										</Button>
+									</div>
+								</DialogContent>
+							</Dialog>
+						</div>
 						<Droppable
 							droppableId={column.id}
 							type="card"
@@ -154,7 +107,7 @@ export default function KanbanColumn({
 									<div
 										{...provided.droppableProps}
 										ref={provided.innerRef}
-										className="flex-grow max-h-[calc(100%-40px-16px)] overflow-auto px-2 mt-2"
+										className="flex-grow max-h-[calc(100%-40px-16px)] overflow-auto mt-2 px-2"
 									>
 										{column.tasks.map((t, i) => (
 											<TaskCard

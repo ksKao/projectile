@@ -97,6 +97,91 @@ export const kanbanRouter = createTRPCRouter({
 				});
 			}
 		}),
+	deleteColumn: protectedProcedure
+		.input(z.string().uuid("Invalid column ID"))
+		.mutation(async ({ input, ctx }) => {
+			try {
+				// check if user is member of project
+				const column = await ctx.db.kanbanColumns.findFirst({
+					where: {
+						id: input,
+					},
+					include: {
+						project: true,
+					},
+				});
+
+				if (!column)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "Invalid column ID",
+					});
+
+				if (!column.project.members.includes(ctx.auth.userId))
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "You do not have permission to delete column",
+					});
+
+				await ctx.db.kanbanColumns.delete({
+					where: {
+						id: input,
+					},
+				});
+			} catch {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Something went wrong. Please try again later.",
+				});
+			}
+		}),
+	changeColumnName: protectedProcedure
+		.input(
+			z.object({
+				columnId: z.string().uuid("Invalid column ID"),
+				name: z.string().min(1, "Column name is required"),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			try {
+				// check if user is member of project
+				const column = await ctx.db.kanbanColumns.findFirst({
+					where: {
+						id: input.columnId,
+					},
+					include: {
+						project: true,
+					},
+				});
+
+				if (!column)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "Invalid column ID",
+					});
+
+				if (!column.project.members.includes(ctx.auth.userId))
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message: "Not member of this project",
+					});
+
+				await ctx.db.kanbanColumns.update({
+					data: {
+						name: input.name,
+					},
+					where: {
+						id: input.columnId,
+					},
+				});
+			} catch {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Something went wrong. Please try again later.",
+				});
+			}
+		}),
+
 	addTask: protectedProcedure
 		.input(
 			z.object({
