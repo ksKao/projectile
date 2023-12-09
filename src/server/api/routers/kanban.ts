@@ -618,4 +618,49 @@ export const kanbanRouter = createTRPCRouter({
 				});
 			}
 		}),
+	deleteTask: protectedProcedure
+		.input(z.string().uuid("Invalid task ID"))
+		.mutation(async ({ input, ctx }) => {
+			try {
+				// check if user is member of project
+				const task = await ctx.db.tasks.findFirst({
+					where: {
+						id: input,
+					},
+					include: {
+						kanbanColumn: {
+							include: {
+								project: true,
+							},
+						},
+					},
+				});
+
+				if (!task)
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "Invalid task ID",
+					});
+
+				if (
+					!task.kanbanColumn.project.members.includes(ctx.auth.userId)
+				)
+					throw new TRPCError({
+						code: "UNAUTHORIZED",
+						message:
+							"You do not have permission to delete this task",
+					});
+
+				await ctx.db.tasks.delete({
+					where: {
+						id: input,
+					},
+				});
+			} catch {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Something went wrong. Please try again later.",
+				});
+			}
+		}),
 });

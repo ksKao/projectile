@@ -16,6 +16,9 @@ import TaskDueDatePicker from "./task-due-date-picker";
 import TaskAssignedMembers from "./task-assigned-members";
 import TaskDescription from "./task-description";
 import TaskTitle from "./task-title";
+import { Button } from "~/components/ui/button";
+import { api } from "~/trpc/react";
+import toast from "react-hot-toast";
 
 export default function TaskCard({
 	task,
@@ -25,6 +28,15 @@ export default function TaskCard({
 	index: number;
 }) {
 	const project = useProject();
+	const utils = api.useUtils();
+	const { isLoading, mutate } = api.kanban.deleteTask.useMutation({
+		onSuccess: async () => {
+			toast.success("Task deleted successfully");
+			await utils.kanban.getColumns.invalidate();
+		},
+		onError: (e) =>
+			toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message),
+	});
 
 	if (!project) notFound();
 
@@ -116,6 +128,16 @@ export default function TaskCard({
 								taskId={task.id}
 								taskDescription={task.description}
 							/>
+							<Button
+								variant="destructive"
+								className="w-full"
+								loading={isLoading}
+								onClick={() => {
+									mutate(task.id);
+								}}
+							>
+								Delete
+							</Button>
 						</DialogContent>
 					</Dialog>
 				);
