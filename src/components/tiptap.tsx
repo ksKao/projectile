@@ -20,6 +20,7 @@ import { FaCode, FaListUl } from "react-icons/fa";
 import { RiText } from "react-icons/ri";
 import { FaListOl } from "react-icons/fa";
 import { BiCodeBlock } from "react-icons/bi";
+import Link from "@tiptap/extension-link";
 
 type Props = {
 	editable: boolean;
@@ -199,6 +200,7 @@ export default function Tiptap({
 				},
 			}),
 			Underline,
+			Link,
 		],
 		content,
 		editorProps: {
@@ -208,6 +210,15 @@ export default function Tiptap({
 		},
 		editable,
 	});
+
+	const handleClick = (
+		event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+	) => {
+		// Check if the clicked element is the <a> tag
+		if ((event.target as HTMLElement).tagName !== "A") {
+			setEditable(true);
+		}
+	};
 
 	if (!editor) return null;
 
@@ -219,9 +230,7 @@ export default function Tiptap({
 			<EditorContent
 				editor={editor}
 				role={editable ? undefined : "button"}
-				onClick={() => {
-					setEditable(true);
-				}}
+				onClick={handleClick}
 			/>
 			{editable && (
 				<div className="flex gap-2">

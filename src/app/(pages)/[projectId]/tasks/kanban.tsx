@@ -52,7 +52,6 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 			},
 		});
 	const utils = api.useUtils();
-	// const router = useRouter();
 	const project = useProject();
 
 	useEffect(() => {
