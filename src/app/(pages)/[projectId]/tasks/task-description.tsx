@@ -55,8 +55,14 @@ export default function TaskDescription({
 					onSubmit={(editor) => {
 						mutate({
 							taskId,
-							description: editor.getHTML(),
+							description:
+								editor.getText().length === 0
+									? ""
+									: editor.getHTML(),
 						});
+						if (editor.getText().length === 0) {
+							setShowEditor(false);
+						}
 					}}
 					content={taskDescription}
 					onCancel={(editor) => {
