@@ -559,6 +559,8 @@ export const kanbanRouter = createTRPCRouter({
 						id: input.taskId,
 					},
 				});
+
+				return input.description;
 			} catch {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",

@@ -14,10 +14,15 @@ export default function TaskDescription({
 	taskDescription: string;
 }) {
 	const utils = api.useUtils();
+	const [description, setDescription] = useState(taskDescription);
 	const { isLoading, mutate } = api.kanban.modifyTaskDescription.useMutation({
-		onSuccess: () => {
+		onSuccess: (data) => {
 			toast.success("Task description updated successfully");
 			setEditable(false);
+			setDescription(data);
+			if (!data) {
+				setShowEditor(false);
+			}
 		},
 		onError: (e) =>
 			toast.error(e.data?.zodError?.fieldErrors.taskId?.[0] ?? e.message),
@@ -53,18 +58,18 @@ export default function TaskDescription({
 					setEditable={setEditable}
 					isSubmitting={isLoading}
 					onSubmit={(editor) => {
+						const newDesc =
+							editor.getText().length === 0
+								? ""
+								: editor.getHTML();
 						mutate({
 							taskId,
-							description:
-								editor.getText().length === 0
-									? ""
-									: editor.getHTML(),
+							description: newDesc,
 						});
-						if (editor.getText().length === 0) {
-							setShowEditor(false);
-						}
+						setDescription(newDesc);
 					}}
-					content={taskDescription}
+					content={description}
+					// content={taskDescription}
 					onCancel={(editor) => {
 						setEditable?.(false);
 						editor.commands.setContent(taskDescription);
