@@ -51,15 +51,20 @@ export default function TaskDescription({
 				<Tiptap
 					editable={editable}
 					setEditable={setEditable}
-					setShowEditor={setShowEditor}
 					isSubmitting={isLoading}
-					save={(description) => {
+					onSubmit={(editor) => {
 						mutate({
 							taskId,
-							description,
+							description: editor.getHTML(),
 						});
 					}}
 					content={taskDescription}
+					onCancel={(editor) => {
+						setEditable?.(false);
+						editor.commands.setContent(taskDescription);
+						if (editor.getText().length === 0 && setShowEditor)
+							setShowEditor(false);
+					}}
 				/>
 			) : (
 				<div

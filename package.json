@@ -27,6 +27,7 @@
 		"@t3-oss/env-nextjs": "^0.7.0",
 		"@tanstack/react-query": "^4.32.6",
 		"@tiptap/extension-link": "^2.1.13",
+		"@tiptap/extension-placeholder": "^2.1.13",
 		"@tiptap/extension-underline": "^2.1.13",
 		"@tiptap/pm": "^2.1.13",
 		"@tiptap/react": "^2.1.13",

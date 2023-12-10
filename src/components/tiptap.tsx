@@ -21,21 +21,24 @@ import { RiText } from "react-icons/ri";
 import { FaListOl } from "react-icons/fa";
 import { BiCodeBlock } from "react-icons/bi";
 import Link from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
 
 type Props = {
 	editable: boolean;
-	setEditable: (editable: boolean) => void;
-	setShowEditor?: (showEditor: boolean) => void;
+	setEditable?: (editable: boolean) => void;
 	isSubmitting: boolean;
-	save: (data: string) => void;
+	submitButtonText?: string;
+	onSubmit: (editor: Editor) => void;
 	content: string;
 	children?: ReactNode;
+	onCancel?: (editor: Editor) => void;
+	cancelButtonText?: string;
 };
 
 function Menubar({ editor }: { editor: Editor }) {
 	const iconClassName = "w-4 h-4";
 	return (
-		<div className="rounded-md border border-input p-1 flex gap-1 max-w-full flex-wrap">
+		<div className="rounded-md border border-input p-1 flex gap-1 max-w-full flex-wrap mb-4">
 			<Toggle
 				pressed={editor.isActive("bold")}
 				onPressedChange={() =>
@@ -151,10 +154,12 @@ function Menubar({ editor }: { editor: Editor }) {
 export default function Tiptap({
 	editable,
 	setEditable,
-	setShowEditor,
+	submitButtonText = "Submit",
 	isSubmitting,
-	save,
+	onSubmit,
 	content,
+	onCancel,
+	cancelButtonText = "Cancel",
 }: Props) {
 	const editor = useEditor({
 		extensions: [
@@ -176,7 +181,7 @@ export default function Tiptap({
 				},
 				paragraph: {
 					HTMLAttributes: {
-						class: "my-2",
+						// class: "my-2",
 					},
 				},
 				heading: {
@@ -200,7 +205,16 @@ export default function Tiptap({
 				},
 			}),
 			Underline,
-			Link,
+			Link.configure({
+				HTMLAttributes: {
+					class: "no-underline hover:underline",
+				},
+			}),
+			Placeholder.configure({
+				placeholder: "Type Something...",
+				emptyEditorClass:
+					"cursor-text align-middle before:content-[attr(data-placeholder)] before:absolute before:top-2 before:left-2 before:text-mauve-11 before:opacity-50 before-pointer-events-none",
+			}),
 		],
 		content,
 		editorProps: {
@@ -216,7 +230,7 @@ export default function Tiptap({
 	) => {
 		// Check if the clicked element is the <a> tag
 		if ((event.target as HTMLElement).tagName !== "A") {
-			setEditable(true);
+			setEditable?.(true);
 		}
 	};
 
@@ -225,7 +239,7 @@ export default function Tiptap({
 	editor.setEditable(editable);
 
 	return (
-		<>
+		<div className="">
 			{editable && <Menubar editor={editor} />}
 			<EditorContent
 				editor={editor}
@@ -233,31 +247,28 @@ export default function Tiptap({
 				onClick={handleClick}
 			/>
 			{editable && (
-				<div className="flex gap-2">
+				<div className="flex gap-2 mt-4">
 					<Button
 						className="w-20"
 						onClick={() => {
-							save(editor.getHTML());
+							onSubmit(editor);
 						}}
 						loading={isSubmitting}
 						disabled={editor.getHTML() === content}
 					>
-						Save
+						{submitButtonText}
 					</Button>
-					<Button
-						className="w-20"
-						variant="outline"
-						onClick={() => {
-							setEditable(false);
-							editor.commands.setContent(content);
-							if (editor.getText().length === 0 && setShowEditor)
-								setShowEditor(false);
-						}}
-					>
-						Cancel
-					</Button>
+					{onCancel && (
+						<Button
+							className="w-20"
+							variant="outline"
+							onClick={() => onCancel(editor)}
+						>
+							{cancelButtonText}
+						</Button>
+					)}
 				</div>
 			)}
-		</>
+		</div>
 	);
 }
