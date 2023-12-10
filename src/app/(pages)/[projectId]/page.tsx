@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { notFound } from "next/navigation";
 import { Skeleton } from "~/components/ui/skeleton";
 import { format } from "date-fns";
 import { Button } from "~/components/ui/button";
@@ -41,8 +40,6 @@ export default function Project() {
 		onSettled: () => utils.project.getProject.refetch(),
 	});
 	const project = useProject();
-
-	if (!project) notFound();
 
 	return (
 		<>

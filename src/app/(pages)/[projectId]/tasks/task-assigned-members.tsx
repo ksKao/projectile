@@ -10,7 +10,6 @@ import {
 	PopoverTrigger,
 	PopoverContent,
 } from "@/components/ui/popover";
-import { notFound } from "next/navigation";
 import toast from "react-hot-toast";
 import { FaUserPlus } from "react-icons/fa6";
 import LoadingSpinner from "~/components/ui/loading-spinner";
@@ -32,8 +31,6 @@ export default function TaskAssignedMembers({
 			onError: (e) => toast.error(e.message),
 			onSettled: () => utils.kanban.getColumns.invalidate(),
 		});
-
-	if (!project) notFound();
 
 	const notAssignedMembers = project.members.filter(
 		(projectMember) =>

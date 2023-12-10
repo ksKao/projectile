@@ -1,5 +1,5 @@
 "use client";
-import { notFound, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import Tiptap from "~/components/tiptap";
@@ -17,6 +17,7 @@ export default function PostPage() {
 		onSuccess: () => {
 			toast.success("A new thread has been created");
 			router.push(`/${project?.id}/threads`);
+			router.refresh();
 		},
 		onError: (e) => {
 			const zodError = e.data?.zodError?.fieldErrors;
@@ -25,8 +26,6 @@ export default function PostPage() {
 			);
 		},
 	});
-
-	if (!project) notFound();
 
 	return (
 		<>

@@ -40,6 +40,7 @@ export const threadsRouter = createTRPCRouter({
 				await ctx.db.threads.create({
 					data: {
 						...input,
+						author: ctx.auth.userId,
 					},
 				});
 			} catch {

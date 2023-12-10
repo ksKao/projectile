@@ -8,7 +8,6 @@ import {
 	DialogTrigger,
 } from "~/components/ui/dialog";
 import { useProject } from "~/lib/contexts/projectContext";
-import { notFound } from "next/navigation";
 import { Avatar } from "~/components/ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { formatDistanceStrict } from "date-fns";
@@ -37,8 +36,6 @@ export default function TaskCard({
 		onError: (e) =>
 			toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message),
 	});
-
-	if (!project) notFound();
 
 	return (
 		<Draggable draggableId={task.id} index={index}>

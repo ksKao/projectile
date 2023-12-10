@@ -12,7 +12,10 @@ type ProjectWithMember = inferRouterOutputs<AppRouter>["project"]["getProject"];
 const ProjectContext = createContext<ProjectWithMember>(null);
 
 export function useProject() {
-	return useContext(ProjectContext);
+	const project = useContext(ProjectContext);
+	if (!project) notFound();
+
+	return project;
 }
 
 export function ProjectProvider({

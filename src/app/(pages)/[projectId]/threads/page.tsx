@@ -2,6 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/server";
+import ThreadCard from "./thread-card";
 
 export default async function ThreadsPage({
 	params,
@@ -24,7 +25,7 @@ export default async function ThreadsPage({
 						No posts
 					</div>
 				) : (
-					threads.map((t) => <>{t.title}</>)
+					threads.map((t) => <ThreadCard key={t.id} thread={t} />)
 				)}
 			</div>
 		</>
