@@ -28,7 +28,7 @@ export default function TaskDescription({
 			toast.error(e.data?.zodError?.fieldErrors.taskId?.[0] ?? e.message),
 		onSettled: () => utils.kanban.getColumns.invalidate(),
 	});
-	const [showEditor, setShowEditor] = useState(taskDescription.length !== 0);
+	const [showEditor, setShowEditor] = useState(description.length !== 0);
 	const [editable, setEditable] = useState(false);
 
 	return (
@@ -69,7 +69,6 @@ export default function TaskDescription({
 						setDescription(newDesc);
 					}}
 					content={description}
-					// content={taskDescription}
 					onCancel={(editor) => {
 						setEditable?.(false);
 						editor.commands.setContent(taskDescription);
