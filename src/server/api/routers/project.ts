@@ -11,10 +11,12 @@ export const projectRouter = createTRPCRouter({
 	createProject: protectedProcedure
 		.input(createProjectSchema)
 		.mutation(async ({ input, ctx }) => {
-			try {
-				const imageExtension = input.image.split(".").pop();
+			const imageExtension = input.image.split(".").pop();
 
-				const project = await ctx.db.projects.create({
+			let project;
+
+			try {
+				project = await ctx.db.projects.create({
 					data: {
 						name: input.name,
 						description: input.description,
@@ -25,41 +27,46 @@ export const projectRouter = createTRPCRouter({
 						members: [ctx.auth.userId],
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				const { data, error } = await supabase.storage
+			let res;
+			try {
+				res = await supabase.storage
 					.from("projects")
 					.createSignedUploadUrl(
 						`${project.id}/${project.thumbnailFileName}`,
 					);
-
-				if (error)
-					throw new TRPCError({
-						code: "INTERNAL_SERVER_ERROR",
-						message: error.message,
-					});
-
-				return {
-					...data,
-					projectId: project.id,
-				};
 			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (res.error)
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
+					message: res.error.message,
 				});
-			}
+			return {
+				...res.data,
+				projectId: project.id,
+			};
 		}),
 	deleteProject: protectedProcedure
 		.input(z.string().uuid("Invalid project ID."))
 		.mutation(async ({ ctx, input }) => {
-			// check if user is group leader
-			const project = await ctx.db.projects.findFirst({
-				where: {
-					id: {
-						equals: input,
+			let project;
+			try {
+				project = await ctx.db.projects.findFirst({
+					where: {
+						id: {
+							equals: input,
+						},
 					},
-				},
-			});
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
 			if (!project)
 				throw new TRPCError({
@@ -67,21 +74,27 @@ export const projectRouter = createTRPCRouter({
 					message: "Project does not exist.",
 				});
 
+			// check if user is group leader
 			if (project.leader !== ctx.auth.userId)
 				throw new TRPCError({
 					code: "UNAUTHORIZED",
 					message: "Only group leader can delete the project",
 				});
 
-			await ctx.db.projects.delete({
-				where: {
-					id: input,
-				},
-			});
+			try {
+				await ctx.db.projects.delete({
+					where: {
+						id: input,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 		}),
 	getAllProjects: protectedProcedure.query(async ({ ctx }) => {
+		let projects;
 		try {
-			const projects = await ctx.db.projects.findMany({
+			projects = await ctx.db.projects.findMany({
 				where: {
 					members: {
 						has: ctx.auth.userId,
@@ -91,42 +104,46 @@ export const projectRouter = createTRPCRouter({
 					dueDate: "asc",
 				},
 			});
+		} catch {
+			throw ctx.internalServerError;
+		}
 
-			if (projects.length <= 0)
-				return projects.map((p) => {
-					return {
-						...p,
-						members: [] as {
-							userId: string;
-							imageUrl: string;
-						}[],
-						thumbnailUrl: "",
-					};
-				});
-
-			const members: string[] = [];
-
-			// get a list of member id
-			for (const project of projects) {
-				for (const memberId of project.members) {
-					if (!members.includes(memberId)) {
-						members.push(memberId);
-					}
-				}
-			}
-
-			// use the member id to get a list of users from clerk
-			const memberInfos = (
-				await clerkClient.users.getUserList({
-					userId: members,
-				})
-			).map((user) => {
+		if (projects.length <= 0)
+			return projects.map((p) => {
 				return {
-					userId: user.id,
-					imageUrl: user.imageUrl,
+					...p,
+					members: [] as {
+						userId: string;
+						imageUrl: string;
+					}[],
+					thumbnailUrl: "",
 				};
 			});
 
+		const members: string[] = [];
+
+		// get a list of member id
+		for (const project of projects) {
+			for (const memberId of project.members) {
+				if (!members.includes(memberId)) {
+					members.push(memberId);
+				}
+			}
+		}
+
+		// use the member id to get a list of users from clerk
+		const memberInfos = (
+			await clerkClient.users.getUserList({
+				userId: members,
+			})
+		).map((user) => {
+			return {
+				userId: user.id,
+				imageUrl: user.imageUrl,
+			};
+		});
+
+		try {
 			const res = await supabase.storage
 				.from("projects")
 				.createSignedUrls(
@@ -150,18 +167,17 @@ export const projectRouter = createTRPCRouter({
 					thumbnailUrl: res.data?.[i]?.signedUrl ?? "",
 				};
 			});
-		} catch {
-			throw new TRPCError({
-				code: "INTERNAL_SERVER_ERROR",
-				message: "Something went wrong. Please try again later.",
-			});
+		} catch (e) {
+			if (e instanceof TRPCError) throw new TRPCError(e);
+			throw ctx.internalServerError;
 		}
 	}),
 	getProject: protectedProcedure
 		.input(z.string())
 		.query(async ({ input, ctx }) => {
+			let project;
 			try {
-				const project = await ctx.db.projects.findFirst({
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: {
 							equals: input,
@@ -171,10 +187,15 @@ export const projectRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!project) return null;
+			if (!project) return null;
 
-				const userList = (
+			let userList;
+			try {
+				userList = (
 					await clerkClient.users.getUserList({
 						userId: project.members,
 					})
@@ -185,33 +206,35 @@ export const projectRouter = createTRPCRouter({
 						imageUrl: u.imageUrl,
 					};
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				const res = await supabase.storage
+			let res;
+			try {
+				res = await supabase.storage
 					.from("projects")
 					.createSignedUrl(
 						`${project.id}/${project.thumbnailFileName}`,
 						60,
 					);
-
-				if (res.error)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: res.error.message,
-					});
-
-				const thumbnailUrl = res.data.signedUrl;
-
-				return {
-					...project,
-					members: userList,
-					thumbnailUrl,
-				};
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
+
+			if (res.error)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: res.error.message,
+				});
+
+			const thumbnailUrl = res.data.signedUrl;
+
+			return {
+				...project,
+				members: userList,
+				thumbnailUrl,
+			};
 		}),
 	reassignLeader: protectedProcedure
 		.input(
@@ -221,27 +244,33 @@ export const projectRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
-			try {
-				// if new leader is the same as the current leader, return
-				if (input.newLeaderId === ctx.auth.userId) return;
+			// if new leader is the same as the current leader, return
+			if (input.newLeaderId === ctx.auth.userId) return;
 
-				const project = await ctx.db.projects.findFirst({
+			let project;
+			try {
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: input.projectId,
 					},
 				});
-				if (!project)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "Project does not exist.",
-					});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (project.leader !== ctx.auth.userId)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message: "Only group leader can transfer leadership.",
-					});
+			if (!project)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Project does not exist.",
+				});
 
+			if (project.leader !== ctx.auth.userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only group leader can transfer leadership.",
+				});
+
+			try {
 				await ctx.db.projects.update({
 					data: {
 						leader: input.newLeaderId,
@@ -251,10 +280,7 @@ export const projectRouter = createTRPCRouter({
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	removeMember: protectedProcedure
@@ -265,43 +291,48 @@ export const projectRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let project;
 			try {
-				const project = await ctx.db.projects.findFirst({
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: input.projectId,
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!project)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "Project does not exist.",
-					});
+			if (!project)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Project does not exist.",
+				});
 
-				if (project.members.length <= 1)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message:
-							"There must be at least one member in the group. Please delete the group instead.",
-					});
+			if (project.members.length <= 1)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message:
+						"There must be at least one member in the group. Please delete the group instead.",
+				});
 
-				// if removed user is not this user and is not leader
-				if (
-					project.leader !== ctx.auth.userId &&
-					input.removeMemberId !== ctx.auth.userId
-				)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message: "Only project leader can remove other members",
-					});
+			// if removed user is not this user and is not leader
+			if (
+				project.leader !== ctx.auth.userId &&
+				input.removeMemberId !== ctx.auth.userId
+			)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only project leader can remove other members",
+				});
 
-				const newMembers = project.members.filter(
-					(m) => m !== input.removeMemberId,
-				);
-				const newLeader = newMembers.includes(project.leader)
-					? project.leader
-					: newMembers[0];
+			const newMembers = project.members.filter(
+				(m) => m !== input.removeMemberId,
+			);
+			const newLeader = newMembers.includes(project.leader)
+				? project.leader
+				: newMembers[0];
 
+			try {
 				await ctx.db.projects.update({
 					data: {
 						members: {
@@ -313,12 +344,8 @@ export const projectRouter = createTRPCRouter({
 						id: input.projectId,
 					},
 				});
-			} catch (e) {
-				if (e instanceof TRPCError) throw new TRPCError(e);
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+			} catch {
+				throw ctx.internalServerError;
 			}
 		}),
 });

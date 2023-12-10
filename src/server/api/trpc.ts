@@ -29,6 +29,7 @@ import { db } from "~/server/db";
 interface CreateContextOptions {
 	headers: Headers;
 	auth: SignedInAuthObject | SignedOutAuthObject;
+	internalServerError: TRPCError;
 }
 
 /**
@@ -46,6 +47,10 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
 		headers: opts.headers,
 		auth: opts.auth,
 		db,
+		internalServerError: new TRPCError({
+			code: "INTERNAL_SERVER_ERROR",
+			message: "Something went wrong. Please try gain later",
+		}),
 	};
 };
 
@@ -61,6 +66,10 @@ export const createTRPCContext = (opts: { req: NextRequest }) => {
 	return createInnerTRPCContext({
 		headers: opts.req.headers,
 		auth: getAuth(opts.req),
+		internalServerError: new TRPCError({
+			code: "INTERNAL_SERVER_ERROR",
+			message: "Something went wrong. Please try again later.",
+		}),
 	});
 };
 

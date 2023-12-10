@@ -12,9 +12,9 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let project;
 			try {
-				// check if user is member of group
-				const project = await ctx.db.projects.findFirst({
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: input.projectId,
 						members: {
@@ -30,16 +30,20 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				const sortOrder = project?.kanbanColumns?.[0]?.sortOrder;
+			const sortOrder = project?.kanbanColumns?.[0]?.sortOrder;
 
-				if (!project)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message:
-							"Project does not exist, or you do not have permission.",
-					});
+			if (!project)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Project does not exist, or you do not have permission.",
+				});
 
+			try {
 				await ctx.db.kanbanColumns.create({
 					data: {
 						name: input.name,
@@ -48,18 +52,15 @@ export const kanbanRouter = createTRPCRouter({
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	getColumns: protectedProcedure
 		.input(z.string().uuid("Invalid project ID"))
 		.query(async ({ input, ctx }) => {
+			let project;
 			try {
-				// check if user is member of group
-				const project = await ctx.db.projects.findFirst({
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: input,
 						members: {
@@ -81,28 +82,25 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
-
-				if (!project)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message:
-							"Project does not exist, or you do not have permission.",
-					});
-
-				return project.kanbanColumns;
-			} catch (e) {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later",
-				});
+			} catch {
+				throw ctx.internalServerError;
 			}
+
+			if (!project)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Project does not exist, or you do not have permission.",
+				});
+
+			return project.kanbanColumns;
 		}),
 	deleteColumn: protectedProcedure
 		.input(z.string().uuid("Invalid column ID"))
 		.mutation(async ({ input, ctx }) => {
+			let column;
 			try {
-				// check if user is member of project
-				const column = await ctx.db.kanbanColumns.findFirst({
+				column = await ctx.db.kanbanColumns.findFirst({
 					where: {
 						id: input,
 					},
@@ -110,29 +108,30 @@ export const kanbanRouter = createTRPCRouter({
 						project: true,
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!column)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "Invalid column ID",
-					});
+			if (!column)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Invalid column ID",
+				});
 
-				if (!column.project.members.includes(ctx.auth.userId))
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message: "You do not have permission to delete column",
-					});
+			if (!column.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "You do not have permission to delete column",
+				});
 
+			try {
 				await ctx.db.kanbanColumns.delete({
 					where: {
 						id: input,
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	changeColumnName: protectedProcedure
@@ -143,9 +142,9 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let column;
 			try {
-				// check if user is member of project
-				const column = await ctx.db.kanbanColumns.findFirst({
+				column = await ctx.db.kanbanColumns.findFirst({
 					where: {
 						id: input.columnId,
 					},
@@ -153,19 +152,23 @@ export const kanbanRouter = createTRPCRouter({
 						project: true,
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!column)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "Invalid column ID",
-					});
+			if (!column)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Invalid column ID",
+				});
 
-				if (!column.project.members.includes(ctx.auth.userId))
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message: "Not member of this project",
-					});
+			if (!column.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Not member of this project",
+				});
 
+			try {
 				await ctx.db.kanbanColumns.update({
 					data: {
 						name: input.name,
@@ -175,10 +178,7 @@ export const kanbanRouter = createTRPCRouter({
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	addTask: protectedProcedure
@@ -191,9 +191,9 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let project;
 			try {
-				// check if user is member of project
-				const project = await ctx.db.projects.findFirst({
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: {
 							equals: input.projectId,
@@ -217,23 +217,26 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!project)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message:
-							"Project does not exist, or you do not have permission.",
-					});
+			if (!project)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Project does not exist, or you do not have permission.",
+				});
 
-				if (!project.kanbanColumns?.[0])
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "Kanban column does not exist.",
-					});
+			if (!project.kanbanColumns?.[0])
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Kanban column does not exist.",
+				});
 
-				const sortOrder =
-					project.kanbanColumns[0].tasks?.[0]?.sortOrder;
+			const sortOrder = project.kanbanColumns[0].tasks?.[0]?.sortOrder;
 
+			try {
 				await ctx.db.tasks.create({
 					data: {
 						title: input.title,
@@ -242,10 +245,7 @@ export const kanbanRouter = createTRPCRouter({
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	sortColumn: protectedProcedure
@@ -264,8 +264,9 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let project;
 			try {
-				const project = await ctx.db.projects.findFirst({
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: input.projectId,
 						members: {
@@ -273,34 +274,35 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!project)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message:
-							"Project does not exist, or you do not have permission.",
-					});
+			if (!project)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Project does not exist, or you do not have permission.",
+				});
 
-				const transaction = input.sortedColumns.map((c) =>
-					ctx.db.kanbanColumns.update({
-						where: {
-							id: c.id,
-						},
-						data: {
-							sortOrder: c.sortOrder,
-						},
-					}),
-				);
+			const transaction = input.sortedColumns.map((c) =>
+				ctx.db.kanbanColumns.update({
+					where: {
+						id: c.id,
+					},
+					data: {
+						sortOrder: c.sortOrder,
+					},
+				}),
+			);
 
+			try {
 				await ctx.db.$transaction(transaction, {
 					isolationLevel:
 						Prisma.TransactionIsolationLevel.Serializable,
 				});
 			} catch (e) {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	updateTaskOrder: protectedProcedure
@@ -320,9 +322,10 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let project;
 			try {
 				// check if user is member of group
-				const project = await ctx.db.projects.findFirst({
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: {
 							equals: input.projectId,
@@ -332,35 +335,36 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!project)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message:
-							"Project does not exist, or you do not have permission.",
-					});
+			if (!project)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Project does not exist, or you do not have permission.",
+				});
 
-				const transaction = input.tasks.map((t) =>
-					ctx.db.tasks.update({
-						where: {
-							id: t.id,
-						},
-						data: {
-							kanbanColumnId: t.kanbanColumnId,
-							sortOrder: t.sortOrder,
-						},
-					}),
-				);
+			const transaction = input.tasks.map((t) =>
+				ctx.db.tasks.update({
+					where: {
+						id: t.id,
+					},
+					data: {
+						kanbanColumnId: t.kanbanColumnId,
+						sortOrder: t.sortOrder,
+					},
+				}),
+			);
 
+			try {
 				await ctx.db.$transaction(transaction, {
 					isolationLevel:
 						Prisma.TransactionIsolationLevel.Serializable,
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	modifyTaskAssignedMember: protectedProcedure
@@ -375,8 +379,9 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let task;
 			try {
-				const task = await ctx.db.tasks.findFirst({
+				task = await ctx.db.tasks.findFirst({
 					include: {
 						kanbanColumn: {
 							select: {
@@ -390,52 +395,54 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!task)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "This task does not exist",
-					});
-				else if (
-					!task.kanbanColumn.project.members.includes(input.userId)
-				)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message:
-							"The member you are trying to add does not belong to this project",
-					});
-				else if (
-					!task.kanbanColumn.project.members.includes(ctx.auth.userId)
-				)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message: "You are not authorized to modify this task",
-					});
-				else if (
-					input.action === "add" &&
-					task.assignedMembers.includes(input.userId)
-				)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "This member is already assigned to the task",
-					});
-				else if (
-					input.action === "remove" &&
-					!task.assignedMembers.includes(input.userId)
-				)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "This member is not assigned to the task",
-					});
+			if (!task)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This task does not exist",
+				});
+			else if (!task.kanbanColumn.project.members.includes(input.userId))
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message:
+						"The member you are trying to add does not belong to this project",
+				});
+			else if (
+				!task.kanbanColumn.project.members.includes(ctx.auth.userId)
+			)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "You are not authorized to modify this task",
+				});
+			else if (
+				input.action === "add" &&
+				task.assignedMembers.includes(input.userId)
+			)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This member is already assigned to the task",
+				});
+			else if (
+				input.action === "remove" &&
+				!task.assignedMembers.includes(input.userId)
+			)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This member is not assigned to the task",
+				});
 
-				let newMembers = task.assignedMembers;
+			let newMembers = task.assignedMembers;
 
-				if (input.action === "add") {
-					newMembers.push(input.userId);
-				} else {
-					newMembers = newMembers.filter((m) => m !== input.userId);
-				}
+			if (input.action === "add") {
+				newMembers.push(input.userId);
+			} else {
+				newMembers = newMembers.filter((m) => m !== input.userId);
+			}
 
+			try {
 				await ctx.db.tasks.update({
 					data: {
 						assignedMembers: {
@@ -450,11 +457,8 @@ export const kanbanRouter = createTRPCRouter({
 				return input.action === "add"
 					? "Member added succesfully"
 					: "Member removed successfully";
-			} catch (e) {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+			} catch {
+				throw ctx.internalServerError;
 			}
 		}),
 	modifyTaskDueDate: protectedProcedure
@@ -469,8 +473,9 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let task;
 			try {
-				const task = await ctx.db.tasks.findFirst({
+				task = await ctx.db.tasks.findFirst({
 					include: {
 						kanbanColumn: {
 							select: {
@@ -484,21 +489,23 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!task)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "This task does not exist",
-					});
+			if (!task)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This task does not exist",
+				});
 
-				if (
-					!task.kanbanColumn.project.members.includes(ctx.auth.userId)
-				)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message: "You are not authorized to modify this task",
-					});
+			if (!task.kanbanColumn.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "You are not authorized to modify this task",
+				});
 
+			try {
 				await ctx.db.tasks.update({
 					data: {
 						dueDate: input.dueDate ?? null,
@@ -508,10 +515,7 @@ export const kanbanRouter = createTRPCRouter({
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	modifyTaskDescription: protectedProcedure
@@ -522,8 +526,9 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let task;
 			try {
-				const task = await ctx.db.tasks.findFirst({
+				task = await ctx.db.tasks.findFirst({
 					include: {
 						kanbanColumn: {
 							select: {
@@ -537,20 +542,22 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!task)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "This task does not exist",
-					});
-				if (
-					!task.kanbanColumn.project.members.includes(ctx.auth.userId)
-				)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message: "You are not authorized to modify this task",
-					});
+			if (!task)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This task does not exist",
+				});
+			if (!task.kanbanColumn.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "You are not authorized to modify this task",
+				});
 
+			try {
 				await ctx.db.tasks.update({
 					data: {
 						description: input.description,
@@ -576,8 +583,9 @@ export const kanbanRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let task;
 			try {
-				const task = await ctx.db.tasks.findFirst({
+				task = await ctx.db.tasks.findFirst({
 					include: {
 						kanbanColumn: {
 							select: {
@@ -591,20 +599,22 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!task)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "This task does not exist",
-					});
-				if (
-					!task.kanbanColumn.project.members.includes(ctx.auth.userId)
-				)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message: "You are not authorized to modify this task",
-					});
+			if (!task)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This task does not exist",
+				});
+			if (!task.kanbanColumn.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "You are not authorized to modify this task",
+				});
 
+			try {
 				await ctx.db.tasks.update({
 					data: {
 						title: input.title,
@@ -614,18 +624,15 @@ export const kanbanRouter = createTRPCRouter({
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 	deleteTask: protectedProcedure
 		.input(z.string().uuid("Invalid task ID"))
 		.mutation(async ({ input, ctx }) => {
+			let task;
 			try {
-				// check if user is member of project
-				const task = await ctx.db.tasks.findFirst({
+				task = await ctx.db.tasks.findFirst({
 					where: {
 						id: input,
 					},
@@ -637,32 +644,30 @@ export const kanbanRouter = createTRPCRouter({
 						},
 					},
 				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 
-				if (!task)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "Invalid task ID",
-					});
+			if (!task)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Invalid task ID",
+				});
 
-				if (
-					!task.kanbanColumn.project.members.includes(ctx.auth.userId)
-				)
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message:
-							"You do not have permission to delete this task",
-					});
+			if (!task.kanbanColumn.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "You do not have permission to delete this task",
+				});
 
+			try {
 				await ctx.db.tasks.delete({
 					where: {
 						id: input,
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 });

@@ -18,25 +18,29 @@ export const threadsRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
+			let project;
 			try {
-				const project = await ctx.db.projects.findFirst({
+				project = await ctx.db.projects.findFirst({
 					where: {
 						id: input.projectId,
 					},
 				});
-				if (!project)
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: "Project does not exist.",
-					});
+			} catch {
+				throw ctx.internalServerError;
+			}
+			if (!project)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Project does not exist.",
+				});
 
-				if (!project.members.includes(ctx.auth.userId))
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message:
-							"Only members of this project can post a thread.",
-					});
+			if (!project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only members of this project can post a thread.",
+				});
 
+			try {
 				await ctx.db.threads.create({
 					data: {
 						...input,
@@ -44,18 +48,16 @@ export const threadsRouter = createTRPCRouter({
 					},
 				});
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
 		}),
 
 	getThreads: protectedProcedure
 		.input(z.string().uuid("Invalid project ID"))
 		.query(async ({ input, ctx }) => {
+			let threads;
 			try {
-				const threads = await ctx.db.threads.findMany({
+				threads = await ctx.db.threads.findMany({
 					where: {
 						projectId: input,
 					},
@@ -68,30 +70,27 @@ export const threadsRouter = createTRPCRouter({
 						},
 					},
 				});
-
-				const threadWithNumberOfReplies = threads.map((thread) => {
-					const { replies, ...restThread } = thread;
-					return {
-						...restThread,
-						numberOfReplies: replies.length,
-					};
-				});
-
-				if (threads.length === 0) return threadWithNumberOfReplies;
-
-				if (!threads[0]?.project.members.includes(ctx.auth.userId))
-					throw new TRPCError({
-						code: "UNAUTHORIZED",
-						message:
-							"Only members of this project can view these threads",
-					});
-
-				return threadWithNumberOfReplies;
 			} catch {
-				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Something went wrong. Please try again later.",
-				});
+				throw ctx.internalServerError;
 			}
+
+			const threadWithNumberOfReplies = threads.map((thread) => {
+				const { replies, ...restThread } = thread;
+				return {
+					...restThread,
+					numberOfReplies: replies.length,
+				};
+			});
+
+			if (threads.length === 0) return threadWithNumberOfReplies;
+
+			if (!threads[0]?.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Only members of this project can view these threads",
+				});
+
+			return threadWithNumberOfReplies;
 		}),
 });
