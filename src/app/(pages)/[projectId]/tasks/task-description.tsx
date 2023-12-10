@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { TbFileDescription } from "react-icons/tb";
 import Tiptap from "~/components/tiptap";
 import { Button } from "~/components/ui/button";
+import LoadingSpinner from "~/components/ui/loading-spinner";
 import { api } from "~/trpc/react";
 
 export default function TaskDescription({
@@ -15,6 +16,7 @@ export default function TaskDescription({
 }) {
 	const utils = api.useUtils();
 	const [description, setDescription] = useState(taskDescription);
+	const [loading, setLoading] = useState(false);
 	const { isLoading, mutate } = api.kanban.modifyTaskDescription.useMutation({
 		onSuccess: (data) => {
 			toast.success("Task description updated successfully");
@@ -26,7 +28,10 @@ export default function TaskDescription({
 		},
 		onError: (e) =>
 			toast.error(e.data?.zodError?.fieldErrors.taskId?.[0] ?? e.message),
-		onSettled: () => utils.kanban.getColumns.invalidate(),
+		onSettled: async () => {
+			await utils.kanban.getColumns.invalidate();
+			setLoading(false);
+		},
 	});
 	const [showEditor, setShowEditor] = useState(description.length !== 0);
 	const [editable, setEditable] = useState(false);
@@ -52,7 +57,11 @@ export default function TaskDescription({
 					Edit
 				</Button>
 			</div>
-			{showEditor ? (
+			{loading ? (
+				<div className="w-full flex justify-center">
+					<LoadingSpinner />
+				</div>
+			) : showEditor ? (
 				<Tiptap
 					editable={editable}
 					setEditable={setEditable}
@@ -67,6 +76,7 @@ export default function TaskDescription({
 							description: newDesc,
 						});
 						setDescription(newDesc);
+						setLoading(true);
 					}}
 					content={description}
 					onCancel={(editor) => {
