@@ -22,7 +22,7 @@ export default function ThreadCard({
 	const author = project.members.find((m) => m.id === thread.author);
 
 	return (
-		<Card className="p-4 max-w-[calc(100vw-17rem-64px)] mt-4">
+		<Card className="p-4 max-w-[calc(100vw-17rem-64px)] min-w-full mt-4">
 			{/* 17 rem = width of sidebar, 64 px = padding of side bar, 64px = padding of content */}
 			<div className="flex gap-4 items-center">
 				<Avatar>
