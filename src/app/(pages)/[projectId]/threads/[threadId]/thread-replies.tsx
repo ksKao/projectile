@@ -9,21 +9,27 @@ export default function ThreadReplies({
 	replies,
 	parentId = null,
 	depth = 1,
+	activeReplyFormId,
+	setActiveReplyFormId,
 }: {
 	replies: Replies;
 	parentId?: string | null;
 	depth?: number;
+	activeReplyFormId: string;
+	setActiveReplyFormId: React.Dispatch<React.SetStateAction<string>>;
 }) {
 	const filteredReplies = replies.filter((r) => r.parentId === parentId);
 
 	return (
-		<div className="ml-4 mb-2">
+		<div className="ml-2 mb-2">
 			{filteredReplies.map((r) => (
 				<ReplyCard
 					key={r.id}
 					reply={r}
 					allReplies={replies}
 					depth={depth}
+					activeReplyFormId={activeReplyFormId}
+					setActiveReplyFormId={setActiveReplyFormId}
 				/>
 			))}
 		</div>

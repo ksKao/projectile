@@ -28,20 +28,23 @@ export default function ReplyCard({
 	allReplies,
 	reply,
 	depth = 1,
+	activeReplyFormId,
+	setActiveReplyFormId,
 }: {
 	allReplies: Reply[];
 	reply: Reply;
 	depth?: number;
+	activeReplyFormId: string;
+	setActiveReplyFormId: React.Dispatch<React.SetStateAction<string>>;
 }) {
 	const project = useProject();
 	const { isSignedIn, user } = useUser();
-	const [showReplyForm, setShowReplyForm] = useState(false);
 	const router = useRouter();
 	const [editor, setEditor] = useState<Editor | null>(null);
 	const { isLoading, mutate } = api.threads.createReply.useMutation({
 		onSuccess: () => {
 			editor?.commands.setContent("");
-			setShowReplyForm(false);
+			setActiveReplyFormId("");
 			router.refresh();
 		},
 		onError: (e) => {
@@ -61,7 +64,7 @@ export default function ReplyCard({
 
 	return (
 		<div className={`${reply.parentId ? "" : "border mt-4"} rounded-md`}>
-			<div className="p-2">
+			<div className="p-4">
 				<div className="flex gap-2 items-center">
 					<Avatar>
 						<AvatarImage
@@ -87,7 +90,7 @@ export default function ReplyCard({
 					role="none"
 					className="border-0"
 				/>
-				{!showReplyForm && (
+				{activeReplyFormId !== reply.id && (
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild disabled>
@@ -95,7 +98,9 @@ export default function ReplyCard({
 									<Button
 										variant="ghost"
 										className="h-8 w-20"
-										onClick={() => setShowReplyForm(true)}
+										onClick={() =>
+											setActiveReplyFormId(reply.id)
+										}
 										disabled={depth >= 5}
 									>
 										<span className="mr-2">
@@ -128,7 +133,7 @@ export default function ReplyCard({
 					</>
 				) : null}
 			</div>
-			{showReplyForm && (
+			{activeReplyFormId === reply.id && (
 				<div className="mx-6 mb-4 mt-2 rounded-md p-4 bg-muted/40 border">
 					<Tiptap
 						editable
@@ -142,7 +147,7 @@ export default function ReplyCard({
 								});
 							setEditor(editor);
 						}}
-						onCancel={() => setShowReplyForm(false)}
+						onCancel={() => setActiveReplyFormId("")}
 						isSubmitting={isLoading}
 						placeholder="Reply something..."
 					/>
@@ -152,6 +157,8 @@ export default function ReplyCard({
 				replies={allReplies}
 				parentId={reply.id}
 				depth={depth + 1}
+				activeReplyFormId={activeReplyFormId}
+				setActiveReplyFormId={setActiveReplyFormId}
 			/>
 		</div>
 	);
