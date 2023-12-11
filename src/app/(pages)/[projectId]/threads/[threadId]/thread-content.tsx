@@ -13,6 +13,12 @@ import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Card, CardTitle } from "~/components/ui/card";
 import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	DialogTrigger,
+} from "~/components/ui/dialog";
+import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
@@ -32,6 +38,7 @@ export default function TheadContent({ thread }: { thread: Thread }) {
 	const { user, isSignedIn } = useUser();
 	const author = project.members.find((m) => m.id === thread.author);
 	const [editing, setEditing] = useState(false);
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 	const [title, setTitle] = useState(thread.title);
 	const [titleError, setTitleError] = useState("");
 	const { isLoading: editThreadLoading, mutate: editThread } =
@@ -45,6 +52,17 @@ export default function TheadContent({ thread }: { thread: Thread }) {
 				toast.error(
 					error?.title?.[0] ?? error?.threadId?.[0] ?? e.message,
 				);
+			},
+		});
+	const { isLoading: deleteThreadLoading, mutate: deleteThread } =
+		api.threads.deleteThread.useMutation({
+			onSuccess: () => {
+				toast.success("This thread has been deleted");
+				router.replace(`/${project.id}/threads`);
+				router.refresh();
+			},
+			onError: (e) => {
+				toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message);
 			},
 		});
 
@@ -159,12 +177,47 @@ export default function TheadContent({ thread }: { thread: Thread }) {
 									Edit
 								</Button>
 							)}
-							<Button variant="ghost" className="h-8 w-20">
-								<span className="mr-2">
-									<MdDelete />
-								</span>
-								Delete
-							</Button>
+							<Dialog
+								open={showDeleteConfirm}
+								onOpenChange={setShowDeleteConfirm}
+							>
+								<DialogTrigger asChild>
+									<Button
+										variant="ghost"
+										className="h-8 w-20"
+									>
+										<span className="mr-2">
+											<MdDelete />
+										</span>
+										Delete
+									</Button>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogTitle>Confirm Delete</DialogTitle>
+									Are you sure that you want to delete this
+									thread? All replies under this will also be
+									deleted.
+									<div className="w-full flex gap-2 justify-end items-center">
+										<Button
+											variant="outline"
+											onClick={() =>
+												setShowDeleteConfirm(false)
+											}
+										>
+											Cancel
+										</Button>
+										<Button
+											variant="destructive"
+											onClick={() =>
+												deleteThread(thread.id)
+											}
+											loading={deleteThreadLoading}
+										>
+											Delete
+										</Button>
+									</div>
+								</DialogContent>
+							</Dialog>
 						</div>
 						<DropdownMenu>
 							<DropdownMenuTrigger className="md:hidden" asChild>
@@ -181,7 +234,11 @@ export default function TheadContent({ thread }: { thread: Thread }) {
 										Edit
 									</DropdownMenuItem>
 								)}
-								<DropdownMenuItem>Delete</DropdownMenuItem>
+								<DropdownMenuItem
+									onSelect={() => setShowDeleteConfirm(true)}
+								>
+									Delete
+								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</>

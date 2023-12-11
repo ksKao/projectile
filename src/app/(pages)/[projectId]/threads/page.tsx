@@ -19,7 +19,7 @@ export default async function ThreadsPage({
 					<Link href={`/${params.projectId}/threads/post`}>Post</Link>
 				</Button>
 			</div>
-			<div className="min-w-full h-[calc(100%-40px)]">
+			<div className="min-w-full h-[calc(100%-40px)] min-h-fit md:h-fit">
 				{threads.length === 0 ? (
 					<div className="w-full h-full flex justify-center items-center">
 						No posts
@@ -27,6 +27,7 @@ export default async function ThreadsPage({
 				) : (
 					threads.map((t) => <ThreadCard key={t.id} thread={t} />)
 				)}
+				<div className="h-4 w-full md:hidden" />
 			</div>
 		</>
 	);

@@ -373,4 +373,48 @@ export const threadsRouter = createTRPCRouter({
 				throw ctx.internalServerError;
 			}
 		}),
+	deleteThread: protectedProcedure
+		.input(z.string().uuid("Invalid thread ID"))
+		.mutation(async ({ input, ctx }) => {
+			let thread;
+			try {
+				thread = await ctx.db.threads.findFirst({
+					where: {
+						id: input,
+					},
+					include: {
+						project: true,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!thread)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Thread is not found.",
+				});
+
+			// if user is not author nor leader
+			if (
+				thread.author !== ctx.auth.userId &&
+				thread.project.leader !== ctx.auth.userId
+			)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"You must be the author or the project leader to delete this thread.",
+				});
+
+			try {
+				await ctx.db.threads.delete({
+					where: {
+						id: input,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+		}),
 });
