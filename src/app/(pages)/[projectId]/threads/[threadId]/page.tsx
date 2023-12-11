@@ -14,7 +14,9 @@ export default async function ThreadPage({
 	return (
 		<>
 			<ThreadContent thread={thread} />
-			<ReplyForm threadId={thread.id} />
+			<div className="my-6">
+				<ReplyForm threadId={thread.id} />
+			</div>
 			<div className="mt-4 -ml-4">
 				<ThreadReplies replies={thread.replies} />
 			</div>

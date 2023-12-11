@@ -27,7 +27,7 @@ export default function ReplyForm({ threadId }: { threadId: string }) {
 	});
 
 	return (
-		<div className="mt-4 rounded-md bg-muted/50 p-4">
+		<div className="rounded-md max-w-full bg-muted/40 p-4">
 			<Tiptap
 				editable
 				content=""

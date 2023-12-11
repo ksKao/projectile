@@ -173,6 +173,36 @@ export const threadsRouter = createTRPCRouter({
 					message: "Only members of this project can post a reply",
 				});
 
+			// only allow max 5 depths of reply chain
+			async function isReplyChainTooDeep(replyId: string, depth = 1) {
+				if (depth >= 5) {
+					// The reply chain is too deep
+					return true;
+				}
+
+				const reply = await ctx.db.threadReplies.findUnique({
+					where: { id: replyId },
+					include: { parent: true },
+				});
+
+				if (!reply) {
+					// Comment not found
+					return false;
+				}
+
+				if (reply.parentId && reply.parentId !== null)
+					return isReplyChainTooDeep(reply.parentId, depth + 1);
+
+				return false;
+			}
+
+			if (input.parentId && (await isReplyChainTooDeep(input.parentId))) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Reply chain is too deep.",
+				});
+			}
+
 			try {
 				await ctx.db.threadReplies.create({
 					data: {
