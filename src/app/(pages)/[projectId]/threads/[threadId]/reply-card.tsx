@@ -63,7 +63,11 @@ export default function ReplyCard({
 	if (!isSignedIn) redirect("/sign-in");
 
 	return (
-		<div className={`${reply.parentId ? "" : "border mt-4"} rounded-md`}>
+		<div
+			className={`${
+				reply.parentId ? "border-l-[1px]" : "border mt-4 rounded-md"
+			}`}
+		>
 			<div className="p-4">
 				<div className="flex gap-2 items-center">
 					<Avatar>

@@ -14,7 +14,7 @@ export default function ThreadRepliesWrapper({
 	const [activeReplyFormId, setActiveReplyFormId] = useState("");
 
 	return (
-		<div className="mt-4 -ml-2">
+		<div className="mt-4 -ml-4">
 			<ThreadReplies
 				replies={threadReplies}
 				activeReplyFormId={activeReplyFormId}

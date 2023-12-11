@@ -21,7 +21,7 @@ export default function ThreadReplies({
 	const filteredReplies = replies.filter((r) => r.parentId === parentId);
 
 	return (
-		<div className="ml-2 mb-2">
+		<div className="ml-4 mb-2">
 			{filteredReplies.map((r) => (
 				<ReplyCard
 					key={r.id}
