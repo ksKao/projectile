@@ -24,7 +24,7 @@ export default function ThreadRepliesWrapper({
 	);
 
 	return (
-		<div className="mt-4 -ml-4">
+		<div className="pb-4 -ml-4 md:pb-0">
 			<ThreadReplies
 				replies={threadReplies}
 				activeReplyForm={activeReplyFormId}

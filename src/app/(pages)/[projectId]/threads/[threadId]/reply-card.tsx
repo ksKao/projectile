@@ -97,11 +97,6 @@ export default function ReplyCard({
 	const author = project.members.find((m) => m.id === reply.author);
 
 	if (!isSignedIn) redirect("/sign-in");
-	console.log(
-		reply.content,
-		reply.createdAt.toISOString(),
-		reply.updatedAt.toISOString(),
-	);
 
 	return (
 		<div

@@ -310,4 +310,67 @@ export const threadsRouter = createTRPCRouter({
 				},
 			});
 		}),
+	editThread: protectedProcedure
+		.input(
+			z.object({
+				threadId: z.string().uuid("Invalid thread ID"),
+				title: z
+					.string()
+					.min(1, "Thread title is required")
+					.max(
+						100,
+						"Thread title cannot be longer than 100 characters",
+					),
+				content: z.string(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			let thread;
+			try {
+				thread = await ctx.db.threads.findFirst({
+					where: {
+						id: input.threadId,
+					},
+					include: {
+						project: true,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!thread)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Thread does not exist.",
+				});
+
+			// check needed to prevent kicked members from editing existing thread
+			if (!thread.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Only members of this project can edit this thread.",
+				});
+
+			if (thread.author !== ctx.auth.userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only the author of this thread can edit this.",
+				});
+
+			try {
+				await ctx.db.threads.update({
+					data: {
+						title: input.title,
+						content: input.content,
+					},
+					where: {
+						id: input.threadId,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+		}),
 });

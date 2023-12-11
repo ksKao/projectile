@@ -37,6 +37,7 @@ type Props = {
 	onCancel?: (editor: Editor) => void;
 	cancelButtonText?: string;
 	placeholder?: string;
+	submitDisabled?: boolean;
 };
 
 function Menubar({ editor }: { editor: Editor }) {
@@ -167,6 +168,7 @@ export default function Tiptap({
 	onCancel,
 	cancelButtonText = "Cancel",
 	placeholder = "Type something...",
+	submitDisabled = true,
 }: Props) {
 	const editor = useEditor({
 		extensions: [
@@ -268,7 +270,9 @@ export default function Tiptap({
 							onSubmit(editor);
 						}}
 						loading={isSubmitting}
-						disabled={editor.getHTML() === content}
+						disabled={
+							submitDisabled && editor.getHTML() === content
+						}
 					>
 						{submitButtonText}
 					</Button>
