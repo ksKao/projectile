@@ -162,8 +162,9 @@ export default function ReplyCard({
 						<p className="text-muted-foreground px-2">[deleted]</p>
 					)}
 				</div>
-				{activeReplyForm.mode !== "reply" ||
-				activeReplyForm.id !== reply.id ? (
+				{(activeReplyForm.mode !== "reply" ||
+					activeReplyForm.id !== reply.id) &&
+				!reply.deleted ? (
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild disabled>
@@ -192,7 +193,7 @@ export default function ReplyCard({
 						</Tooltip>
 					</TooltipProvider>
 				) : null}
-				{reply.author === user.id ? (
+				{reply.author === user.id && !reply.deleted ? (
 					<>
 						{activeReplyForm.mode !== "edit" ||
 						activeReplyForm.id !== reply.id ? (
