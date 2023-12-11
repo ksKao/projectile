@@ -226,10 +226,7 @@ export default function Tiptap({
 		content,
 		editorProps: {
 			attributes: {
-				class: twMerge(
-					"prose dark:prose-invert prose-base p-2 min-w-full rounded-md border-input border focus:outline-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-					editorClassName,
-				),
+				class: "prose dark:prose-invert prose-base p-2 rounded-md min-w-full focus:outline-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 			},
 		},
 		editable,
@@ -251,11 +248,18 @@ export default function Tiptap({
 	return (
 		<div>
 			{editable && <Menubar editor={editor} />}
-			<EditorContent
-				editor={editor}
-				role={role ? role : editable ? undefined : "button"}
-				onClick={handleClick}
-			/>
+			<div
+				className={twMerge(
+					"rounded-md border-input border",
+					editorClassName,
+				)}
+			>
+				<EditorContent
+					editor={editor}
+					role={role ? role : editable ? undefined : "button"}
+					onClick={handleClick}
+				/>
+			</div>
 			{editable && onSubmit && (
 				<div className="flex gap-2 mt-4">
 					<Button

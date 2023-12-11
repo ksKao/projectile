@@ -6,12 +6,22 @@ import { type inferRouterOutputs } from "@trpc/server";
 
 type Replies = inferRouterOutputs<AppRouter>["threads"]["getThread"]["replies"];
 
+export type ActiveReplyForm = {
+	id: string;
+	mode: "reply" | "edit";
+};
+
 export default function ThreadRepliesWrapper({
 	threadReplies,
 }: {
 	threadReplies: Replies;
 }) {
-	const [activeReplyFormId, setActiveReplyFormId] = useState("");
+	const [activeReplyFormId, setActiveReplyFormId] = useState<ActiveReplyForm>(
+		{
+			id: "",
+			mode: "reply",
+		},
+	);
 
 	return (
 		<div className="mt-4 -ml-4">

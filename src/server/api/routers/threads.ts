@@ -214,4 +214,63 @@ export const threadsRouter = createTRPCRouter({
 				throw ctx.internalServerError;
 			}
 		}),
+	updateReply: protectedProcedure
+		.input(
+			z.object({
+				replyId: z.string().uuid("Invalid thread ID"),
+				content: z.string().min(1, "Content is required"),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			let threadReply;
+
+			try {
+				threadReply = await ctx.db.threadReplies.findFirst({
+					where: {
+						id: input.replyId,
+					},
+					include: {
+						thread: {
+							include: {
+								project: true,
+							},
+						},
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!threadReply)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Thread does not exist",
+				});
+
+			// membership of project is still checked because we don't want kicked members to be able to modify reply
+			if (!threadReply.thread.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only members of this group can edit reply",
+				});
+
+			if (threadReply.author !== ctx.auth.userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only author of this reply can edit.",
+				});
+
+			try {
+				await ctx.db.threadReplies.update({
+					data: {
+						content: input.content,
+					},
+					where: {
+						id: input.replyId,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+		}),
 });

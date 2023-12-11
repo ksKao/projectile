@@ -20,6 +20,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { type ActiveReplyForm } from "./thread-replies-wrapper";
 
 type Reply =
 	inferRouterOutputs<AppRouter>["threads"]["getThread"]["replies"][number];
@@ -34,29 +35,49 @@ export default function ReplyCard({
 	allReplies: Reply[];
 	reply: Reply;
 	depth?: number;
-	activeReplyFormId: string;
-	setActiveReplyFormId: React.Dispatch<React.SetStateAction<string>>;
+	activeReplyFormId: ActiveReplyForm;
+	setActiveReplyFormId: React.Dispatch<React.SetStateAction<ActiveReplyForm>>;
 }) {
 	const project = useProject();
 	const { isSignedIn, user } = useUser();
 	const router = useRouter();
 	const [editor, setEditor] = useState<Editor | null>(null);
-	const { isLoading, mutate } = api.threads.createReply.useMutation({
-		onSuccess: () => {
-			editor?.commands.setContent("");
-			setActiveReplyFormId("");
-			router.refresh();
-		},
-		onError: (e) => {
-			const error = e.data?.zodError?.fieldErrors;
-			toast.error(
-				error?.content?.[0] ??
-					error?.threadId?.[0] ??
-					error?.parentId?.[0] ??
-					e.message,
-			);
-		},
-	});
+	const { isLoading: isCreatingReply, mutate: createReply } =
+		api.threads.createReply.useMutation({
+			onSuccess: () => {
+				setActiveReplyFormId({
+					id: "",
+					mode: "reply",
+				});
+				router.refresh();
+			},
+			onError: (e) => {
+				const error = e.data?.zodError?.fieldErrors;
+				toast.error(
+					error?.content?.[0] ??
+						error?.threadId?.[0] ??
+						error?.parentId?.[0] ??
+						e.message,
+				);
+			},
+		});
+	const { isLoading: isUpdatingReply, mutate: updateReply } =
+		api.threads.updateReply.useMutation({
+			onSuccess: () => {
+				editor?.commands.setContent("");
+				setActiveReplyFormId({
+					id: "",
+					mode: "reply",
+				});
+				router.refresh();
+			},
+			onError: (e) => {
+				const error = e.data?.zodError?.fieldErrors;
+				toast.error(
+					error?.content?.[0] ?? error?.replyId?.[0] ?? e.message,
+				);
+			},
+		});
 
 	const author = project.members.find((m) => m.id === reply.author);
 
@@ -88,13 +109,38 @@ export default function ReplyCard({
 						</span>
 					</div>
 				</div>
-				<Tiptap
-					content={reply.content}
-					editable={false}
-					role="none"
-					className="border-0"
-				/>
-				{activeReplyFormId !== reply.id && (
+				<div className="my-4">
+					<Tiptap
+						content={reply.content}
+						editable={
+							activeReplyFormId.id === reply.id &&
+							activeReplyFormId.mode === "edit"
+						}
+						role="none"
+						onSubmit={(editor) => {
+							if (editor.getText().length > 0)
+								updateReply({
+									replyId: reply.id,
+									content: editor.getHTML(),
+								});
+						}}
+						isSubmitting={isUpdatingReply}
+						onCancel={() =>
+							setActiveReplyFormId({
+								id: "",
+								mode: "reply",
+							})
+						}
+						className={
+							activeReplyFormId.id === reply.id &&
+							activeReplyFormId.mode === "edit"
+								? ""
+								: "border-0"
+						}
+					/>
+				</div>
+				{activeReplyFormId.mode !== "reply" ||
+				activeReplyFormId.id !== reply.id ? (
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild disabled>
@@ -103,7 +149,10 @@ export default function ReplyCard({
 										variant="ghost"
 										className="h-8 w-20"
 										onClick={() =>
-											setActiveReplyFormId(reply.id)
+											setActiveReplyFormId({
+												id: reply.id,
+												mode: "reply",
+											})
 										}
 										disabled={depth >= 5}
 									>
@@ -119,15 +168,28 @@ export default function ReplyCard({
 							</TooltipContent>
 						</Tooltip>
 					</TooltipProvider>
-				)}
+				) : null}
 				{reply.author === user.id ? (
 					<>
-						<Button variant="ghost" className="h-8 w-20">
-							<span className="mr-2">
-								<MdModeEdit />
-							</span>
-							Edit
-						</Button>
+						{activeReplyFormId.mode !== "edit" ||
+						activeReplyFormId.id !== reply.id ? (
+							<Button
+								variant="ghost"
+								className="h-8 w-20"
+								onClick={() =>
+									setActiveReplyFormId({
+										id: reply.id,
+										mode: "edit",
+									})
+								}
+							>
+								<span className="mr-2">
+									<MdModeEdit />
+								</span>
+								Edit
+							</Button>
+						) : null}
+
 						<Button variant="ghost" className="h-8 w-20">
 							<span className="mr-2">
 								<MdDelete />
@@ -137,26 +199,32 @@ export default function ReplyCard({
 					</>
 				) : null}
 			</div>
-			{activeReplyFormId === reply.id && (
-				<div className="mx-6 mb-4 mt-2 rounded-md p-4 bg-muted/40 border">
-					<Tiptap
-						editable
-						content=""
-						onSubmit={(editor) => {
-							if (editor.getText().length !== 0)
-								mutate({
-									threadId: reply.threadId,
-									content: editor.getHTML(),
-									parentId: reply.id,
-								});
-							setEditor(editor);
-						}}
-						onCancel={() => setActiveReplyFormId("")}
-						isSubmitting={isLoading}
-						placeholder="Reply something..."
-					/>
-				</div>
-			)}
+			{activeReplyFormId.id === reply.id &&
+				activeReplyFormId.mode === "reply" && (
+					<div className="mx-6 mb-4 mt-2 rounded-md p-4 bg-muted/40 border">
+						<Tiptap
+							editable
+							content=""
+							onSubmit={(editor) => {
+								if (editor.getText().length !== 0)
+									createReply({
+										threadId: reply.threadId,
+										content: editor.getHTML(),
+										parentId: reply.id,
+									});
+								setEditor(editor);
+							}}
+							onCancel={() =>
+								setActiveReplyFormId({
+									id: "",
+									mode: "reply",
+								})
+							}
+							isSubmitting={isCreatingReply}
+							placeholder="Reply something..."
+						/>
+					</div>
+				)}
 			<ThreadReplies
 				replies={allReplies}
 				parentId={reply.id}

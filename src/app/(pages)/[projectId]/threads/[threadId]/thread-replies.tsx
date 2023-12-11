@@ -2,6 +2,7 @@ import { type inferRouterOutputs } from "@trpc/server";
 import React from "react";
 import { type AppRouter } from "~/server/api/root";
 import ReplyCard from "./reply-card";
+import { type ActiveReplyForm } from "./thread-replies-wrapper";
 
 type Replies = inferRouterOutputs<AppRouter>["threads"]["getThread"]["replies"];
 
@@ -15,8 +16,8 @@ export default function ThreadReplies({
 	replies: Replies;
 	parentId?: string | null;
 	depth?: number;
-	activeReplyFormId: string;
-	setActiveReplyFormId: React.Dispatch<React.SetStateAction<string>>;
+	activeReplyFormId: ActiveReplyForm;
+	setActiveReplyFormId: React.Dispatch<React.SetStateAction<ActiveReplyForm>>;
 }) {
 	const filteredReplies = replies.filter((r) => r.parentId === parentId);
 
