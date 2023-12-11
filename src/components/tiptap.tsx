@@ -249,7 +249,7 @@ export default function Tiptap({
 	editor.setEditable(editable);
 
 	return (
-		<div className="">
+		<div>
 			{editable && <Menubar editor={editor} />}
 			<EditorContent
 				editor={editor}

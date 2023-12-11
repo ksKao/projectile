@@ -108,7 +108,11 @@ export const threadsRouter = createTRPCRouter({
 						},
 					},
 					include: {
-						replies: true,
+						replies: {
+							orderBy: {
+								createdAt: "desc",
+							},
+						},
 						project: true,
 					},
 				});
@@ -130,5 +134,54 @@ export const threadsRouter = createTRPCRouter({
 				});
 
 			return thread;
+		}),
+	createReply: protectedProcedure
+		.input(
+			z.object({
+				threadId: z.string().uuid("Invalid thread ID"),
+				content: z.string().min(1, "Content is required"),
+				parentId: z
+					.string()
+					.uuid("Invalid parent comment ID")
+					.nullable(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			let thread;
+			try {
+				thread = await ctx.db.threads.findFirst({
+					where: {
+						id: input.threadId,
+					},
+					include: {
+						project: true,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!thread)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Thread does not exist",
+				});
+
+			if (!thread.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only members of this project can post a reply",
+				});
+
+			try {
+				await ctx.db.threadReplies.create({
+					data: {
+						...input,
+						author: ctx.auth.userId,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 		}),
 });

@@ -13,7 +13,10 @@ export default async function ThreadPage({
 	return (
 		<>
 			<ThreadContent thread={thread} />
-			<CommentForm />
+			<CommentForm threadId={thread.id} />
+			{thread.replies.map((r) => (
+				<>{r.content}</>
+			))}
 		</>
 	);
 }
