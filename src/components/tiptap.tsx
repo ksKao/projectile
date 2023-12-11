@@ -27,9 +27,9 @@ import { twMerge } from "tailwind-merge";
 type Props = {
 	editable: boolean;
 	setEditable?: (editable: boolean) => void;
-	isSubmitting: boolean;
+	isSubmitting?: boolean;
 	submitButtonText?: string;
-	onSubmit: (editor: Editor) => void;
+	onSubmit?: (editor: Editor) => void;
 	role?: React.AriaRole;
 	className?: string;
 	content: string;
@@ -159,7 +159,7 @@ export default function Tiptap({
 	editable,
 	setEditable,
 	submitButtonText = "Submit",
-	isSubmitting,
+	isSubmitting = false,
 	role,
 	className: editorClassName = "",
 	onSubmit,
@@ -256,7 +256,7 @@ export default function Tiptap({
 				role={role ? role : editable ? undefined : "button"}
 				onClick={handleClick}
 			/>
-			{editable && (
+			{editable && onSubmit && (
 				<div className="flex gap-2 mt-4">
 					<Button
 						className="w-20"
