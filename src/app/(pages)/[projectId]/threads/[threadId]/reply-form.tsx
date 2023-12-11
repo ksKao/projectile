@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import Tiptap from "~/components/tiptap";
 import { api } from "~/trpc/react";
 
-export default function CommentForm({ threadId }: { threadId: string }) {
+export default function ReplyForm({ threadId }: { threadId: string }) {
 	const router = useRouter();
 	const [editor, setEditor] = useState<Editor | null>(null);
 	const { isLoading, mutate } = api.threads.createReply.useMutation({

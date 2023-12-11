@@ -1,7 +1,8 @@
 import React from "react";
 import { api } from "~/trpc/server";
 import ThreadContent from "./thread-content";
-import CommentForm from "./comment-form";
+import ReplyForm from "./reply-form";
+import ThreadReplies from "./thread-replies";
 
 export default async function ThreadPage({
 	params,
@@ -13,10 +14,8 @@ export default async function ThreadPage({
 	return (
 		<>
 			<ThreadContent thread={thread} />
-			<CommentForm threadId={thread.id} />
-			{thread.replies.map((r) => (
-				<>{r.content}</>
-			))}
+			<ReplyForm threadId={thread.id} />
+			<ThreadReplies replies={thread.replies} />
 		</>
 	);
 }
