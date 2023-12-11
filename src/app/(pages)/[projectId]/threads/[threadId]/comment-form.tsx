@@ -1,15 +1,20 @@
 "use client";
 
+import { type Editor } from "@tiptap/react";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import Tiptap from "~/components/tiptap";
 import { api } from "~/trpc/react";
 
 export default function CommentForm({ threadId }: { threadId: string }) {
 	const router = useRouter();
+	const [editor, setEditor] = useState<Editor | null>(null);
 	const { isLoading, mutate } = api.threads.createReply.useMutation({
-		onSuccess: () => router.refresh(),
+		onSuccess: () => {
+			editor?.commands.setContent("");
+			router.refresh();
+		},
 		onError: (e) => {
 			const error = e.data?.zodError?.fieldErrors;
 			toast.error(
@@ -33,7 +38,7 @@ export default function CommentForm({ threadId }: { threadId: string }) {
 							content: editor.getHTML(),
 							parentId: null,
 						});
-					editor.commands.setContent("");
+					setEditor(editor);
 				}}
 				isSubmitting={isLoading}
 				placeholder="Write a comment..."
