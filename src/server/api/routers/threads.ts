@@ -110,7 +110,7 @@ export const threadsRouter = createTRPCRouter({
 					include: {
 						replies: {
 							orderBy: {
-								createdAt: "desc",
+								updatedAt: "desc",
 							},
 						},
 						project: true,
@@ -272,5 +272,42 @@ export const threadsRouter = createTRPCRouter({
 			} catch {
 				throw ctx.internalServerError;
 			}
+		}),
+	deleteReply: protectedProcedure
+		.input(z.string())
+		.mutation(async ({ input, ctx }) => {
+			let threadReply;
+			try {
+				threadReply = await ctx.db.threadReplies.findFirst({
+					where: {
+						id: input,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!threadReply)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Reply is not found.",
+				});
+
+			if (threadReply.author !== ctx.auth.userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only the author of this reply can delete this.",
+				});
+
+			await ctx.db.threadReplies.update({
+				data: {
+					deleted: true,
+					content: "",
+					updatedAt: threadReply.updatedAt, // keep updated at to avoid it being sorted at the top
+				},
+				where: {
+					id: input,
+				},
+			});
 		}),
 });

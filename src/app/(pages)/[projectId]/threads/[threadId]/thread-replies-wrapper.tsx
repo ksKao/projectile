@@ -27,8 +27,8 @@ export default function ThreadRepliesWrapper({
 		<div className="mt-4 -ml-4">
 			<ThreadReplies
 				replies={threadReplies}
-				activeReplyFormId={activeReplyFormId}
-				setActiveReplyFormId={setActiveReplyFormId}
+				activeReplyForm={activeReplyFormId}
+				setActiveReplyForm={setActiveReplyFormId}
 			/>
 		</div>
 	);

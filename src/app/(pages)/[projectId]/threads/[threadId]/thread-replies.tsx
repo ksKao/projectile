@@ -10,14 +10,14 @@ export default function ThreadReplies({
 	replies,
 	parentId = null,
 	depth = 1,
-	activeReplyFormId,
-	setActiveReplyFormId,
+	activeReplyForm,
+	setActiveReplyForm,
 }: {
 	replies: Replies;
 	parentId?: string | null;
 	depth?: number;
-	activeReplyFormId: ActiveReplyForm;
-	setActiveReplyFormId: React.Dispatch<React.SetStateAction<ActiveReplyForm>>;
+	activeReplyForm: ActiveReplyForm;
+	setActiveReplyForm: React.Dispatch<React.SetStateAction<ActiveReplyForm>>;
 }) {
 	const filteredReplies = replies.filter((r) => r.parentId === parentId);
 
@@ -29,8 +29,8 @@ export default function ThreadReplies({
 					reply={r}
 					allReplies={replies}
 					depth={depth}
-					activeReplyFormId={activeReplyFormId}
-					setActiveReplyFormId={setActiveReplyFormId}
+					activeReplyForm={activeReplyForm}
+					setActiveReplyForm={setActiveReplyForm}
 				/>
 			))}
 		</div>

@@ -75,6 +75,7 @@ model ThreadReplies {
     parentId  String?
     parent    ThreadReplies?  @relation("ThreadReplies", fields: [parentId], references: [id])
     children  ThreadReplies[] @relation("ThreadReplies")
+    deleted   Boolean         @default(false)
 }
 
 model Files {
