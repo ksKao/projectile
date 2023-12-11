@@ -22,6 +22,7 @@ import { FaListOl } from "react-icons/fa";
 import { BiCodeBlock } from "react-icons/bi";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { twMerge } from "tailwind-merge";
 
 type Props = {
 	editable: boolean;
@@ -29,10 +30,13 @@ type Props = {
 	isSubmitting: boolean;
 	submitButtonText?: string;
 	onSubmit: (editor: Editor) => void;
+	role?: React.AriaRole;
+	className?: string;
 	content: string;
 	children?: ReactNode;
 	onCancel?: (editor: Editor) => void;
 	cancelButtonText?: string;
+	placeholder?: string;
 };
 
 function Menubar({ editor }: { editor: Editor }) {
@@ -156,10 +160,13 @@ export default function Tiptap({
 	setEditable,
 	submitButtonText = "Submit",
 	isSubmitting,
+	role,
+	className: editorClassName = "",
 	onSubmit,
 	content,
 	onCancel,
 	cancelButtonText = "Cancel",
+	placeholder = "Type something...",
 }: Props) {
 	const editor = useEditor({
 		extensions: [
@@ -211,7 +218,7 @@ export default function Tiptap({
 				},
 			}),
 			Placeholder.configure({
-				placeholder: "Type Something...",
+				placeholder,
 				emptyEditorClass:
 					"cursor-text align-middle before:content-[attr(data-placeholder)] before:absolute before:top-2 before:left-2 before:text-mauve-11 before:opacity-50 before-pointer-events-none",
 			}),
@@ -219,7 +226,10 @@ export default function Tiptap({
 		content,
 		editorProps: {
 			attributes: {
-				class: "prose dark:prose-invert prose-base p-2 min-w-full rounded-md border-input border focus:outline-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+				class: twMerge(
+					"prose dark:prose-invert prose-base p-2 min-w-full rounded-md border-input border focus:outline-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+					editorClassName,
+				),
 			},
 		},
 		editable,
@@ -243,7 +253,7 @@ export default function Tiptap({
 			{editable && <Menubar editor={editor} />}
 			<EditorContent
 				editor={editor}
-				role={editable ? undefined : "button"}
+				role={role ? role : editable ? undefined : "button"}
 				onClick={handleClick}
 			/>
 			{editable && (

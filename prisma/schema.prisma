@@ -65,13 +65,16 @@ model Threads {
 }
 
 model ThreadReplies {
-    id        String   @id @default(uuid())
+    id        String          @id @default(uuid())
     content   String
     author    String
-    thread    Threads  @relation(fields: [threadId], references: [id], onDelete: Cascade)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    thread    Threads         @relation(fields: [threadId], references: [id], onDelete: Cascade)
+    createdAt DateTime        @default(now())
+    updatedAt DateTime        @updatedAt
     threadId  String
+    parentId  String?
+    parent    ThreadReplies?  @relation("ThreadReplies", fields: [parentId], references: [id])
+    children  ThreadReplies[] @relation("ThreadReplies")
 }
 
 model Files {

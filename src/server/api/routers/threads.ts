@@ -51,7 +51,6 @@ export const threadsRouter = createTRPCRouter({
 				throw ctx.internalServerError;
 			}
 		}),
-
 	getThreads: protectedProcedure
 		.input(z.string().uuid("Invalid project ID"))
 		.query(async ({ input, ctx }) => {
@@ -68,6 +67,9 @@ export const threadsRouter = createTRPCRouter({
 								id: true,
 							},
 						},
+					},
+					orderBy: {
+						createdAt: "desc",
 					},
 				});
 			} catch {
@@ -92,5 +94,41 @@ export const threadsRouter = createTRPCRouter({
 				});
 
 			return threadWithNumberOfReplies;
+		}),
+	getThread: protectedProcedure
+		.input(z.string().uuid("Invalid thread ID"))
+		.query(async ({ input, ctx }) => {
+			let thread;
+
+			try {
+				thread = await ctx.db.threads.findFirst({
+					where: {
+						id: {
+							equals: input,
+						},
+					},
+					include: {
+						replies: true,
+						project: true,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!thread)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Thread does not exist.",
+				});
+
+			if (!thread.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Only members of this project can view this thread.",
+				});
+
+			return thread;
 		}),
 });
