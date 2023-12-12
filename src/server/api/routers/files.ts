@@ -196,33 +196,65 @@ export const filesRouter = createTRPCRouter({
 					message:
 						"Only members of this project can view these files.",
 				});
+			return files;
+		}),
+	getDownloadUrl: protectedProcedure
+		.input(z.string().uuid("Invalid file ID"))
+		.mutation(async ({ input, ctx }) => {
+			let file;
+			try {
+				file = await ctx.db.files.findFirst({
+					where: {
+						id: input,
+					},
+					include: {
+						project: true,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!file)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "File is not found",
+				});
+
+			if (!file.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Only members of this project can download the file",
+				});
 
 			let res;
 			try {
-				res = await supabase.storage.from("projects").createSignedUrls(
-					files.map((f) => `${f.projectId}/files/${f.id}`),
-					60,
-					{
-						download: true,
-					},
-				);
+				res = await supabase.storage
+					.from("projects")
+					.createSignedUrl(
+						`${file.projectId}/files/${file.id}`,
+						300,
+						{
+							download: file.fileName,
+						},
+					);
 			} catch {
 				throw ctx.internalServerError;
 			}
 
 			if (res.error)
 				throw new TRPCError({
-					code: "BAD_REQUEST",
+					code: "INTERNAL_SERVER_ERROR",
 					message: res.error.message,
 				});
 
-			const signedUrls = res.data.map((r) => r.signedUrl);
+			if (!res.data.signedUrl)
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "The file does not exist in storage.",
+				});
 
-			return files.map((f, i) => {
-				return {
-					...f,
-					downloadUrl: signedUrls[i] ?? "",
-				};
-			});
+			return res.data.signedUrl;
 		}),
 });

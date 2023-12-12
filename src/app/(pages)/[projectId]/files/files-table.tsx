@@ -12,19 +12,35 @@ import { format } from "date-fns";
 import { useProject } from "~/lib/contexts/projectContext";
 import { useUser } from "@clerk/nextjs";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { type inferRouterOutputs } from "@trpc/server";
-import { type AppRouter } from "~/server/api/root";
+import { type Files } from "@prisma/client";
 import { IoMdDownload } from "react-icons/io";
 import { HiOutlinePencil } from "react-icons/hi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { Button } from "~/components/ui/button";
-import Link from "next/link";
+import { useRouter } from "next-nprogress-bar";
+import { api } from "~/trpc/react";
+import toast from "react-hot-toast";
+import LoadingSpinner from "~/components/ui/loading-spinner";
 
-type File = inferRouterOutputs<AppRouter>["files"]["getFiles"][number];
-
-export default function FilesTable({ files }: { files: File[] }) {
+export default function FilesTable({ files }: { files: Files[] }) {
 	const project = useProject();
+	const router = useRouter();
 	const { user } = useUser();
+	const { isLoading: getDownloadUrlLoading, mutate: getDownloadUrl } =
+		api.files.getDownloadUrl.useMutation({
+			onSuccess: (signedUrl) => {
+				router.push(
+					signedUrl,
+					{},
+					{
+						showProgressBar: false,
+					},
+				);
+			},
+			onError: (e) => {
+				toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message);
+			},
+		});
 	return (
 		<Table className="mt-4">
 			<TableHeader>
@@ -61,19 +77,24 @@ export default function FilesTable({ files }: { files: File[] }) {
 							<TableCell>{format(f.createdAt, "PPP")}</TableCell>
 							<TableCell>
 								<div className="flex h-full w-full justify-between">
-									<Button variant="ghost" asChild>
-										<Link
-											href={f.downloadUrl}
-											download={f.fileName}
-										>
-											<IoMdDownload />
-										</Link>
+									<Button
+										variant="ghost"
+										onClick={() => {
+											getDownloadUrl(f.id);
+										}}
+										disabled={getDownloadUrlLoading}
+									>
+										{getDownloadUrlLoading ? (
+											<LoadingSpinner className="w-4 h-4" />
+										) : (
+											<IoMdDownload className="w-4 h-4" />
+										)}
 									</Button>
 									<Button variant="ghost">
-										<HiOutlinePencil />
+										<HiOutlinePencil className="w-4 h-4" />
 									</Button>
 									<Button variant="ghost">
-										<FaRegTrashCan />
+										<FaRegTrashCan className="w-4 h-4" />
 									</Button>
 								</div>
 							</TableCell>

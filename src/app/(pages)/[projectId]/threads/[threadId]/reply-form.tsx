@@ -1,7 +1,7 @@
 "use client";
 
 import { type Editor } from "@tiptap/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import Tiptap from "~/components/tiptap";

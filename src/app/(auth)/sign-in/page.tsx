@@ -2,7 +2,7 @@
 
 import { useSignIn } from "@clerk/nextjs";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "~/components/ui/button";
