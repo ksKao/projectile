@@ -9,7 +9,6 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "./theme-provider";
 import { Toaster } from "react-hot-toast";
-import NextTopLoader from "nextjs-toploader";
 import ProgressBarProvider from "~/lib/progressBarProvider";
 
 const inter = Inter({
@@ -32,7 +31,6 @@ export default function RootLayout({
 		<ClerkProvider>
 			<html lang="en" suppressHydrationWarning>
 				<body className={`font-sans ${inter.variable} bg-background`}>
-					{/* <NextTopLoader /> */}
 					<ProgressBarProvider>
 						<ThemeProvider
 							attribute="class"
