@@ -16,8 +16,8 @@ import toast from "react-hot-toast";
 import {
 	Dialog,
 	DialogContent,
-	DialogFooter,
 	DialogHeader,
+	DialogTitle,
 	DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
@@ -28,6 +28,7 @@ export default function FileRow({ file }: { file: Files }) {
 	const router = useRouter();
 	const [newFileName, setNewFileName] = useState(file.fileName);
 	const [editModalOpen, setEditModalOpen] = useState(false);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [inputFocused, setInputFocused] = useState(false); // used to check if the edit input has been focused, so that the text only highlights on first focus
 	const [newFileNameError, setNewFileNameError] = useState("");
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +57,17 @@ export default function FileRow({ file }: { file: Files }) {
 				toast.error(
 					e.data?.zodError?.fieldErrors.newFileName?.[0] ?? e.message,
 				),
+		});
+	const { isLoading: deleteFileLoading, mutate: deleteFile } =
+		api.files.deleteFile.useMutation({
+			onSuccess: () => {
+				toast.success("File has been deleted");
+				router.refresh();
+				setDeleteModalOpen(false);
+			},
+			onError: (e) => {
+				toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message);
+			},
 		});
 
 	return (
@@ -110,7 +122,9 @@ export default function FileRow({ file }: { file: Files }) {
 								inputRef.current?.focus();
 							}}
 						>
-							<DialogHeader>Edit File Name</DialogHeader>
+							<DialogHeader>
+								<DialogTitle> Edit File Name</DialogTitle>
+							</DialogHeader>
 							<form
 								onSubmit={(e) => {
 									e.preventDefault();
@@ -144,7 +158,7 @@ export default function FileRow({ file }: { file: Files }) {
 									}}
 									ref={inputRef}
 								/>
-								<DialogFooter className="flex w-full justify-end gap-2 flex-row">
+								<div className="flex w-full justify-end gap-2 flex-row">
 									<Button
 										variant="ghost"
 										type="button"
@@ -164,13 +178,44 @@ export default function FileRow({ file }: { file: Files }) {
 									>
 										Save
 									</Button>
-								</DialogFooter>
+								</div>
 							</form>
 						</DialogContent>
 					</Dialog>
-					<Button variant="ghost">
-						<FaRegTrashCan className="w-4 h-4" />
-					</Button>
+					<Dialog
+						open={deleteModalOpen}
+						onOpenChange={(open) => setDeleteModalOpen(open)}
+					>
+						<DialogTrigger asChild>
+							<Button variant="ghost">
+								<FaRegTrashCan className="w-4 h-4" />
+							</Button>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Delete File?</DialogTitle>
+							</DialogHeader>
+							This file will be deleted and cannot be recovered.
+							Are you sure?
+							<div className="w-full justify-end flex gap-2">
+								<Button
+									variant="ghost"
+									onClick={() => setDeleteModalOpen(false)}
+								>
+									Cancel
+								</Button>
+								<Button
+									variant="destructive"
+									loading={deleteFileLoading}
+									onClick={() => {
+										deleteFile(file.id);
+									}}
+								>
+									Delete
+								</Button>
+							</div>
+						</DialogContent>
+					</Dialog>
 				</div>
 			</TableCell>
 		</TableRow>
