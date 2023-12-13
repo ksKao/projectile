@@ -257,4 +257,73 @@ export const filesRouter = createTRPCRouter({
 
 			return res.data.signedUrl;
 		}),
+	editFileName: protectedProcedure
+		.input(
+			z.object({
+				fileId: z.string().uuid("Invalid file ID"),
+				newFileName: z
+					.string()
+					.min(1, "File name is required")
+					.max(100, "File name cannot be longer than 100 characters"),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			let file;
+
+			try {
+				file = await ctx.db.files.findFirst({
+					where: {
+						id: input.fileId,
+					},
+					include: {
+						project: true,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!file)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "File is not found",
+				});
+
+			if (!file.project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only member of this project can edit file name",
+				});
+
+			let existingFile;
+			try {
+				existingFile = await ctx.db.files.findFirst({
+					where: {
+						projectId: file.projectId,
+						fileName: input.newFileName,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (existingFile)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "File already exists",
+				});
+
+			try {
+				await ctx.db.files.update({
+					data: {
+						fileName: input.newFileName,
+					},
+					where: {
+						id: input.fileId,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+		}),
 });
