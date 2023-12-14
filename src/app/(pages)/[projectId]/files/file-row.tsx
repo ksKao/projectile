@@ -1,5 +1,4 @@
 "use client";
-import { useUser } from "@clerk/nextjs";
 import { type Files } from "@prisma/client";
 import { format } from "date-fns";
 import React, { useRef, useState } from "react";
@@ -24,7 +23,6 @@ import { Input } from "~/components/ui/input";
 
 export default function FileRow({ file }: { file: Files }) {
 	const project = useProject();
-	const { user } = useUser();
 	const router = useRouter();
 	const [newFileName, setNewFileName] = useState(file.fileName);
 	const [editModalOpen, setEditModalOpen] = useState(false);
@@ -78,14 +76,15 @@ export default function FileRow({ file }: { file: Files }) {
 					<Avatar className="w-8 h-8">
 						<AvatarImage
 							src={
-								project.members.find((m) => m.id === user?.id)
-									?.imageUrl
+								project.members.find(
+									(m) => m.id === file.uploadedBy,
+								)?.imageUrl
 							}
 							alt={file.uploadedBy}
 						/>
 						<AvatarFallback>N/A</AvatarFallback>
 					</Avatar>
-					{project.members.find((m) => m.id === user?.id ?? "")
+					{project.members.find((m) => m.id === file.uploadedBy)
 						?.username ?? "Removed"}
 				</div>
 			</TableCell>
