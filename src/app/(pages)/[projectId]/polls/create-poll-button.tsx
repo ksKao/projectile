@@ -1,5 +1,7 @@
 "use client";
+import { useRouter } from "next-nprogress-bar";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { IoMdClose } from "react-icons/io";
 import { Button } from "~/components/ui/button";
 import {
@@ -33,11 +35,48 @@ export default function CreatePollButton() {
 			title: "",
 		},
 	]);
-	const { isLoading, mutate } = api.polls.createPoll.useMutation();
+	const { isLoading, mutate } = api.polls.createPoll.useMutation({
+		onSuccess: () => {
+			toast.success("A new poll has been created");
+			setOpen(false);
+			setPollTitle("");
+			setPollOptions([
+				{
+					id: crypto.randomUUID(),
+					title: "",
+				},
+				{
+					id: crypto.randomUUID(),
+					title: "",
+				},
+			]);
+			router.refresh();
+		},
+		onError: (e) => toast.error(e.message),
+	});
 	const project = useProject();
+	const router = useRouter();
 
 	const createPoll: React.FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
+		setPollTitleError("");
+		// if is loading or there is an empty option, dont submit
+		if (
+			isLoading ||
+			pollOptions.find((p) => p.title.length === 0) !== undefined
+		)
+			return;
+
+		if (pollTitle.length === 0) {
+			setPollTitleError("Poll title is required");
+			return;
+		}
+
+		mutate({
+			projectId: project.id,
+			title: pollTitle,
+			options: pollOptions.map((o) => o.title),
+		});
 	};
 
 	return (
@@ -72,15 +111,29 @@ export default function CreatePollButton() {
 						</span>
 					</div>
 					<h2 className="text-xl font-semibold mt-4 mb-2">Options</h2>
-					<div>
+					<div className="flex flex-col gap-3">
 						{pollOptions.map((option) => (
 							<div
 								key={option.id}
-								className="flex items-start gap-2"
+								className="flex items-start gap-2 relative"
 							>
+								<Button
+									onClick={() => {
+										setPollOptions((prev) =>
+											prev.filter(
+												(o) => o.id !== option.id,
+											),
+										);
+									}}
+									type="button"
+									disabled={pollOptions.length <= 2}
+								>
+									<IoMdClose />
+								</Button>
 								<Input
 									value={option.title}
 									onChange={(e) => {
+										if (e.target.value.length > 50) return;
 										const newPollOptions = [...pollOptions];
 										const optionIndex =
 											pollOptions.findIndex(
@@ -98,18 +151,9 @@ export default function CreatePollButton() {
 									}}
 									placeholder="Option Title"
 								/>
-								<Button
-									onClick={() => {
-										setPollOptions((prev) =>
-											prev.filter(
-												(o) => o.id !== option.id,
-											),
-										);
-									}}
-									disabled={pollOptions.length <= 2}
-								>
-									<IoMdClose />
-								</Button>
+								<span className="text-muted-foreground absolute bottom-0 right-0 text-sm">
+									{option.title.length} / {50}
+								</span>
 							</div>
 						))}
 					</div>
@@ -125,6 +169,7 @@ export default function CreatePollButton() {
 									},
 								]);
 							}}
+							type="button"
 						>
 							Add Another Option
 						</Button>

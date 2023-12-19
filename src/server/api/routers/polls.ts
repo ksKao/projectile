@@ -26,7 +26,7 @@ export const pollsRouter = createTRPCRouter({
 							),
 					)
 					.min(2, "A poll must have at least 2 options")
-					.max(10, "A poll cannot have more than 10 options"),
+					.max(5, "A poll cannot have more than 5 options"),
 			}),
 		)
 		.mutation(async ({ input, ctx }) => {
@@ -72,5 +72,47 @@ export const pollsRouter = createTRPCRouter({
 					}),
 				});
 			});
+		}),
+	getPolls: protectedProcedure
+		.input(z.string().uuid("Invalid project ID"))
+		.query(async ({ input, ctx }) => {
+			let project;
+			try {
+				project = await ctx.db.projects.findFirst({
+					where: {
+						id: input,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!project)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Project not found.",
+				});
+
+			if (!project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only members of this project can view polls.",
+				});
+
+			try {
+				return await ctx.db.polls.findMany({
+					where: {
+						projectId: input,
+					},
+					include: {
+						options: true,
+					},
+					orderBy: {
+						createdAt: "desc",
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
 		}),
 });
