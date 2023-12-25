@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { IoIosSave } from "react-icons/io";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
@@ -42,13 +43,15 @@ export default function UpdateProjectDescriptionForm() {
 					name="projectDescription"
 					className="md:w-[500px]"
 				/>
-				<Button
-					disabled={projectDescription === project.description}
-					loading={isLoading}
-					className="ml-auto"
-				>
-					Submit
-				</Button>
+				<div className="w-full flex justify-end -mt-2">
+					<Button
+						disabled={projectDescription === project.description}
+						loading={isLoading}
+						className="w-full"
+					>
+						<IoIosSave />
+					</Button>
+				</div>
 			</div>
 		</form>
 	);
