@@ -2,7 +2,6 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createProjectSchema } from "~/lib/schema";
-import { generatePassword } from "~/lib/utils";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { supabase } from "~/server/supabase";
@@ -22,7 +21,6 @@ export const projectRouter = createTRPCRouter({
 						description: input.description,
 						dueDate: input.dueDate,
 						thumbnailFileName: `thumbnail.${imageExtension}`,
-						password: generatePassword(),
 						leader: ctx.auth.userId,
 						members: [ctx.auth.userId],
 					},
@@ -342,6 +340,62 @@ export const projectRouter = createTRPCRouter({
 					},
 					where: {
 						id: input.projectId,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+		}),
+	updateProject: protectedProcedure
+		.input(
+			z.object({
+				id: z.string().uuid("Invalid project ID"),
+				name: z
+					.string()
+					.min(1, "Project name is required")
+					.max(
+						255,
+						"Project name cannot be longer than 255 characters.",
+					)
+					.nullish(),
+				description: z.string().nullish(),
+				dueDate: z.date().nullish(),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			let project;
+			try {
+				project = await ctx.db.projects.findFirst({
+					where: {
+						id: input.id,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!project)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Project does not exist.",
+				});
+
+			if (project.leader !== ctx.auth.userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only the project leader can update project",
+				});
+
+			try {
+				await ctx.db.projects.update({
+					where: {
+						id: input.id,
+					},
+					data: {
+						name: input.name ?? undefined,
+						description:
+							input.description === null ? "" : input.description,
+						dueDate: input.dueDate ?? undefined,
 					},
 				});
 			} catch {

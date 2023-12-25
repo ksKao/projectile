@@ -16,7 +16,7 @@ model Projects {
     name              String
     members           String[]
     leader            String
-    password          String
+    password          String          @default(cuid())
     description       String
     thumbnailFileName String
     kanbanColumns     KanbanColumns[]
