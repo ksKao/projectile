@@ -1,6 +1,7 @@
 import React from "react";
 import CreatePollButton from "./create-poll-button";
 import { api } from "~/trpc/server";
+import PollCard from "./poll-card";
 
 export default async function PollsPage({
 	params,
@@ -17,16 +18,11 @@ export default async function PollsPage({
 				<h1 className="text-2xl font-bold">Polls</h1>
 				<CreatePollButton />
 			</div>
-			{polls.map((p) => (
-				<div key={p.id}>
-					<h2 className="font-bold text-lg">{p.title}</h2>
-					<ul>
-						{p.options.map((o) => (
-							<li key={o.id}>{o.title}</li>
-						))}
-					</ul>
-				</div>
-			))}
+			<div className="w-full grid grid-cols-[repeat(auto-fit,minmax(min(350px,100%),1fr))] gap-4 max-w-full mt-4">
+				{polls.map((p) => (
+					<PollCard key={p.id} poll={p} />
+				))}
+			</div>
 		</>
 	);
 }

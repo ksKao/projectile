@@ -99,17 +99,9 @@ model Polls {
 }
 
 model PollOptions {
-    id      String  @id @default(uuid())
+    id      String   @id @default(uuid())
     title   String
-    Polls   Polls   @relation(fields: [pollsId], references: [id], onDelete: Cascade)
+    Polls   Polls    @relation(fields: [pollsId], references: [id], onDelete: Cascade)
     pollsId String
-    votes   Votes[]
-}
-
-model Votes {
-    userId        String
-    option        PollOptions @relation(fields: [pollOptionsId], references: [id], onDelete: Cascade)
-    pollOptionsId String
-
-    @@id([userId, pollOptionsId])
+    votedBy String[] @default([])
 }
