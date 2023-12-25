@@ -15,10 +15,112 @@ export default async function Home() {
 				<CreateProjectModal />
 			</div>
 			{user?.emailAddresses[0]?.emailAddress}
-			<div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+			<div className="grid grid-cols-[repeat(auto-fill,minmax(min(350px,100%),1fr))] gap-4 max-w-full mt-4 pb-2">
 				{projects.length > 0 ? (
 					projects.map((p) => (
-						<Link href={`/${p.id}`} key={p.id}>
+						<Link href={`/${p.id}`} key={p.id} className="w-full">
+							<ProjectCard
+								project={{
+									id: p.id,
+									name: p.name,
+									dueDate: p.dueDate,
+									thumbnailUrl: p.thumbnailUrl,
+									members: p.members,
+								}}
+							/>
+						</Link>
+					))
+				) : (
+					<p>No Projects</p>
+				)}
+				{projects.length > 0 ? (
+					projects.map((p) => (
+						<Link href={`/${p.id}`} key={p.id} className="w-full">
+							<ProjectCard
+								project={{
+									id: p.id,
+									name: p.name,
+									dueDate: p.dueDate,
+									thumbnailUrl: p.thumbnailUrl,
+									members: p.members,
+								}}
+							/>
+						</Link>
+					))
+				) : (
+					<p>No Projects</p>
+				)}
+				{projects.length > 0 ? (
+					projects.map((p) => (
+						<Link href={`/${p.id}`} key={p.id} className="w-full">
+							<ProjectCard
+								project={{
+									id: p.id,
+									name: p.name,
+									dueDate: p.dueDate,
+									thumbnailUrl: p.thumbnailUrl,
+									members: p.members,
+								}}
+							/>
+						</Link>
+					))
+				) : (
+					<p>No Projects</p>
+				)}
+				{projects.length > 0 ? (
+					projects.map((p) => (
+						<Link href={`/${p.id}`} key={p.id} className="w-full">
+							<ProjectCard
+								project={{
+									id: p.id,
+									name: p.name,
+									dueDate: p.dueDate,
+									thumbnailUrl: p.thumbnailUrl,
+									members: p.members,
+								}}
+							/>
+						</Link>
+					))
+				) : (
+					<p>No Projects</p>
+				)}
+				{projects.length > 0 ? (
+					projects.map((p) => (
+						<Link href={`/${p.id}`} key={p.id} className="w-full">
+							<ProjectCard
+								project={{
+									id: p.id,
+									name: p.name,
+									dueDate: p.dueDate,
+									thumbnailUrl: p.thumbnailUrl,
+									members: p.members,
+								}}
+							/>
+						</Link>
+					))
+				) : (
+					<p>No Projects</p>
+				)}
+				{projects.length > 0 ? (
+					projects.map((p) => (
+						<Link href={`/${p.id}`} key={p.id} className="w-full">
+							<ProjectCard
+								project={{
+									id: p.id,
+									name: p.name,
+									dueDate: p.dueDate,
+									thumbnailUrl: p.thumbnailUrl,
+									members: p.members,
+								}}
+							/>
+						</Link>
+					))
+				) : (
+					<p>No Projects</p>
+				)}
+				{projects.length > 0 ? (
+					projects.map((p) => (
+						<Link href={`/${p.id}`} key={p.id} className="w-full">
 							<ProjectCard
 								project={{
 									id: p.id,

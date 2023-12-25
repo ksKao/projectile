@@ -61,7 +61,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 	const memberImageDimension = 32;
 
 	return (
-		<Card className="overflow-hidden w-full md:w-96 max-w-full" ref={ref}>
+		<Card className="overflow-hidden w-full max-w-full" ref={ref}>
 			<CardContent className="p-4 w-full">
 				<div className="flex max-w-full">
 					<div className="relative min-w-[96px] min-h-full">
@@ -102,7 +102,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 									),
 							)}
 							{numberOfExtraMembers > 0 && (
-								<div className="bg-primary w-9 h-9 rounded-full flex items-center justify-center overflow-hidden text-white">
+								<div className="bg-primary w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center overflow-hidden text-white">
 									+{numberOfExtraMembers}
 								</div>
 							)}

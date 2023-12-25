@@ -71,7 +71,7 @@ export default function PollCard({ initialPoll }: { initialPoll: Poll }) {
 								<BiTrash className="w-5 h-5" />
 							</Button>
 						</DialogTrigger>
-						<DialogContent>
+						<DialogContent className="max-w-[90vw]">
 							<DialogTitle>Delete Poll</DialogTitle>
 							Are you sure you want to delete this poll?
 							<div className="flex w-full justify-end gap-2">
