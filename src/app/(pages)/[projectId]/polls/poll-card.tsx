@@ -115,8 +115,8 @@ export default function PollCard({ initialPoll }: { initialPoll: Poll }) {
 							<div
 								className={`${
 									o.votedBy.includes(user?.id ?? "")
-										? "bg-primary"
-										: "bg-muted"
+										? "bg-primary/20"
+										: "bg-gray-200 dark:bg-gray-500"
 								} absolute h-full min-h-full -z-10`}
 								id={`${o.votedBy.length}%`}
 								style={{
@@ -124,7 +124,11 @@ export default function PollCard({ initialPoll }: { initialPoll: Poll }) {
 								}}
 							/>
 							<button
-								className="w-full text-left p-2 flex items-center justify-between"
+								className={`${
+									o.votedBy.includes(user?.id ?? "")
+										? "text-primary"
+										: "text-foreground"
+								} w-full text-left p-2 flex items-center justify-between`}
 								disabled={
 									voteLoading ??
 									deletePollLoading ??
