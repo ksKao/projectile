@@ -49,7 +49,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
 		db,
 		internalServerError: new TRPCError({
 			code: "INTERNAL_SERVER_ERROR",
-			message: "Something went wrong. Please try gain later",
+			message: "Something went wrong. Please try again later",
 		}),
 	};
 };

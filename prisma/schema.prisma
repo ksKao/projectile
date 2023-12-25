@@ -99,9 +99,12 @@ model Polls {
 }
 
 model PollOptions {
-    id      String   @id @default(uuid())
-    title   String
-    Polls   Polls    @relation(fields: [pollsId], references: [id], onDelete: Cascade)
-    pollsId String
-    votedBy String[] @default([])
+    id        String   @id @default(uuid())
+    title     String
+    poll      Polls    @relation(fields: [pollsId], references: [id], onDelete: Cascade)
+    pollsId   String
+    votedBy   String[] @default([])
+    sortOrder Int
+
+    @@unique([pollsId, sortOrder])
 }

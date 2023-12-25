@@ -20,7 +20,7 @@ export default async function PollsPage({
 			</div>
 			<div className="w-full grid grid-cols-[repeat(auto-fit,minmax(min(350px,100%),1fr))] gap-4 max-w-full mt-4">
 				{polls.map((p) => (
-					<PollCard key={p.id} poll={p} />
+					<PollCard key={p.id} initialPoll={p} />
 				))}
 			</div>
 		</>
