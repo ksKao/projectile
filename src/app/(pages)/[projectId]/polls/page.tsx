@@ -18,7 +18,7 @@ export default async function PollsPage({
 				<h1 className="text-2xl font-bold">Polls</h1>
 				<CreatePollButton />
 			</div>
-			<div className="w-full grid grid-cols-[repeat(auto-fit,minmax(min(350px,100%),1fr))] gap-4 max-w-full mt-4">
+			<div className="w-full grid grid-cols-[repeat(auto-fit,minmax(min(350px,100%),1fr))] gap-4 max-w-full mt-4 pb-2">
 				{polls.map((p) => (
 					<PollCard key={p.id} initialPoll={p} />
 				))}

@@ -210,4 +210,39 @@ export const pollsRouter = createTRPCRouter({
 				throw ctx.internalServerError;
 			}
 		}),
+	deletePoll: protectedProcedure
+		.input(z.string().uuid("Invalid poll ID"))
+		.mutation(async ({ input, ctx }) => {
+			let poll;
+			try {
+				poll = await ctx.db.polls.findFirst({
+					where: {
+						id: input,
+					},
+					include: {
+						project: true,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!poll)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Poll does not exist",
+				});
+
+			if (poll.project.leader !== ctx.auth.userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Only project leader can delete polls",
+				});
+
+			await ctx.db.polls.delete({
+				where: {
+					id: input,
+				},
+			});
+		}),
 });
