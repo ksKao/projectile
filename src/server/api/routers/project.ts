@@ -1,8 +1,8 @@
 import { clerkClient } from "@clerk/nextjs/server";
+import { createId } from "@paralleldrive/cuid2";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createProjectSchema } from "~/lib/schema";
-import { cuid } from "~/lib/utils";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { supabase } from "~/server/supabase";
@@ -11,8 +11,6 @@ export const projectRouter = createTRPCRouter({
 	createProject: protectedProcedure
 		.input(createProjectSchema)
 		.mutation(async ({ input, ctx }) => {
-			const imageExtension = input.image.split(".").pop();
-
 			let project;
 
 			try {
@@ -21,8 +19,8 @@ export const projectRouter = createTRPCRouter({
 						name: input.name,
 						description: input.description,
 						dueDate: input.dueDate,
-						thumbnailFileName: `thumbnail.${imageExtension}`,
 						leader: ctx.auth.userId,
+						password: createId(),
 						members: [ctx.auth.userId],
 					},
 				});
@@ -34,9 +32,7 @@ export const projectRouter = createTRPCRouter({
 			try {
 				res = await supabase.storage
 					.from("projects")
-					.createSignedUploadUrl(
-						`${project.id}/${project.thumbnailFileName}`,
-					);
+					.createSignedUploadUrl(`${project.id}/thumbnail`);
 			} catch {
 				throw ctx.internalServerError;
 			}
@@ -87,6 +83,32 @@ export const projectRouter = createTRPCRouter({
 					},
 				});
 			} catch {
+				throw ctx.internalServerError;
+			}
+
+			let res;
+			try {
+				res = await supabase.storage
+					.from("projects")
+					.list(`${project.id}/files`);
+				if (res.error) throw new Error(res.error.message);
+
+				const projectId = project.id;
+
+				res = await supabase.storage
+					.from("projects")
+					.remove([
+						...res.data.map((f) => `${projectId}/files/${f.name}`),
+						`${projectId}/thumbnail`,
+					]);
+
+				if (res.error) throw new Error(res.error.message);
+			} catch (e) {
+				if (e instanceof Error)
+					throw new TRPCError({
+						code: "INTERNAL_SERVER_ERROR",
+						message: e.message,
+					});
 				throw ctx.internalServerError;
 			}
 		}),
@@ -146,7 +168,7 @@ export const projectRouter = createTRPCRouter({
 			const res = await supabase.storage
 				.from("projects")
 				.createSignedUrls(
-					projects.map((p) => `${p.id}/${p.thumbnailFileName}`),
+					projects.map((p) => `${p.id}/thumbnail`),
 					60,
 				);
 
@@ -213,21 +235,12 @@ export const projectRouter = createTRPCRouter({
 			try {
 				res = await supabase.storage
 					.from("projects")
-					.createSignedUrl(
-						`${project.id}/${project.thumbnailFileName}`,
-						60,
-					);
+					.createSignedUrl(`${project.id}/thumbnail`, 60);
 			} catch {
 				throw ctx.internalServerError;
 			}
 
-			if (res.error)
-				throw new TRPCError({
-					code: "BAD_REQUEST",
-					message: res.error.message,
-				});
-
-			const thumbnailUrl = res.data.signedUrl;
+			const thumbnailUrl = res.error ? "" : res.data.signedUrl;
 
 			return {
 				...project,
@@ -435,20 +448,16 @@ export const projectRouter = createTRPCRouter({
 						"Only the project leader can change the project thumbnail",
 				});
 
-			const oldFileName = project.thumbnailFileName;
-			const newFileName =
-				"thumbnail." + input.newFileName.split(".").pop();
-
 			// create signed URL
 			let res;
 			try {
 				// delete old file
 				await supabase.storage
 					.from("projects")
-					.remove([`${project.id}/${oldFileName}`]);
+					.remove([`${project.id}/thumbnail`]);
 				res = await supabase.storage
 					.from("projects")
-					.createSignedUploadUrl(`${project.id}/${newFileName}`);
+					.createSignedUploadUrl(`${project.id}/thumbnail`);
 			} catch {
 				throw ctx.internalServerError;
 			}
@@ -458,21 +467,6 @@ export const projectRouter = createTRPCRouter({
 					code: "INTERNAL_SERVER_ERROR",
 					message: res.error.message,
 				});
-
-			try {
-				if (oldFileName !== newFileName) {
-					await ctx.db.projects.update({
-						where: {
-							id: project.id,
-						},
-						data: {
-							thumbnailFileName: newFileName,
-						},
-					});
-				}
-			} catch {
-				throw ctx.internalServerError;
-			}
 
 			return res.data;
 		}),
@@ -503,15 +497,13 @@ export const projectRouter = createTRPCRouter({
 						"Only the project leader can regenerate the password",
 				});
 
-			const newPassword = cuid();
-
 			try {
 				const { password } = await ctx.db.projects.update({
 					where: {
 						id: input,
 					},
 					data: {
-						password: newPassword,
+						password: createId(),
 					},
 					select: {
 						password: true,

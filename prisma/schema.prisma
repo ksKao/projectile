@@ -12,20 +12,19 @@ datasource db {
 }
 
 model Projects {
-    id                String          @id @default(uuid())
-    name              String
-    members           String[]
-    leader            String
-    password          String          @default(cuid())
-    description       String
-    thumbnailFileName String
-    kanbanColumns     KanbanColumns[]
-    threads           Threads[]
-    files             Files[]
-    polls             Polls[]
-    dueDate           DateTime
-    createdAt         DateTime        @default(now())
-    updatedAt         DateTime        @updatedAt
+    id            String          @id @default(uuid())
+    name          String
+    members       String[]
+    leader        String
+    password      String
+    description   String
+    kanbanColumns KanbanColumns[]
+    threads       Threads[]
+    files         Files[]
+    polls         Polls[]
+    dueDate       DateTime
+    createdAt     DateTime        @default(now())
+    updatedAt     DateTime        @updatedAt
 }
 
 model KanbanColumns {

@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { FaRegClipboard } from "react-icons/fa6";
 import { IoMdRefresh } from "react-icons/io";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useProject } from "~/lib/contexts/projectContext";
 import { api } from "~/trpc/react";
@@ -24,9 +25,7 @@ export default function RegeneratePasswordForm() {
 		<div className="md:max-w-[500px]">
 			<Label>Project Password</Label>
 			<div className="flex gap-2 justify-between w-full">
-				<p className="p-2 border border-muted rounded-md flex-grow">
-					{project.password}
-				</p>
+				<Input disabled value={password} className="-mb-5" />
 				<Button
 					onClick={() => {
 						navigator.clipboard
