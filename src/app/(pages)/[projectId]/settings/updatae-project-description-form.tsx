@@ -34,14 +34,14 @@ export default function UpdateProjectDescriptionForm() {
 			}}
 		>
 			<Label htmlFor="projectDescription">Project Name</Label>
-			<div className="md:max-w-[500px]">
+			<div className="w-full md:max-w-[500px]">
 				<Textarea
 					placeholder="Project Description"
 					value={projectDescription}
 					onChange={(e) => setProjectDescription(e.target.value)}
 					id="projectDescription"
 					name="projectDescription"
-					className="md:w-[500px]"
+					className="w-full md:w-[500px]"
 				/>
 				<div className="w-full flex justify-end -mt-2">
 					<Button

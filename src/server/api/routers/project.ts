@@ -402,4 +402,77 @@ export const projectRouter = createTRPCRouter({
 				throw ctx.internalServerError;
 			}
 		}),
+	updateProjectThumbnail: protectedProcedure
+		.input(
+			z.object({
+				id: z.string().uuid("Invalid project ID"),
+				newFileName: z.string().min(1, "Image name is required."),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			let project;
+			try {
+				project = await ctx.db.projects.findFirst({
+					where: {
+						id: input.id,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!project)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Project is not found",
+				});
+
+			if (project.leader !== ctx.auth.userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Only the project leader can change the project thumbnail",
+				});
+
+			const oldFileName = project.thumbnailFileName;
+			const newFileName =
+				"thumbnail." + input.newFileName.split(".").pop();
+
+			// create signed URL
+			let res;
+			try {
+				// delete old file
+				await supabase.storage
+					.from("projects")
+					.remove([`${project.id}/${oldFileName}`]);
+				res = await supabase.storage
+					.from("projects")
+					.createSignedUploadUrl(`${project.id}/${newFileName}`);
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (res.error)
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: res.error.message,
+				});
+
+			try {
+				if (oldFileName !== newFileName) {
+					await ctx.db.projects.update({
+						where: {
+							id: project.id,
+						},
+						data: {
+							thumbnailFileName: newFileName,
+						},
+					});
+				}
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			return res.data;
+		}),
 });

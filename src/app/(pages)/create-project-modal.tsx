@@ -153,7 +153,7 @@ export default function CreateProjectModal() {
 						id="thumbnail"
 						name="thumbnail"
 						type="file"
-						accept="image/png image/jpeg"
+						accept="image/png, image/jpeg"
 						label="Project Thumbnail"
 						onChange={(e) => {
 							setProjectInfo({

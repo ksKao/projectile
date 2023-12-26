@@ -2,6 +2,7 @@ import React from "react";
 import UpdateProjectNameForm from "./update-project-name-form";
 import UpdateProjectDescriptionForm from "./updatae-project-description-form";
 import UpdateProjectDueDateForm from "./update-project-due-date-form";
+import UpdateProjectThumbnailForm from "./update-project-thumbnail-form";
 
 export default function ProjectSettingsPage() {
 	return (
@@ -12,6 +13,8 @@ export default function ProjectSettingsPage() {
 			<UpdateProjectDescriptionForm />
 			<div className="mt-5" />
 			<UpdateProjectDueDateForm />
+			<div className="mt-5" />
+			<UpdateProjectThumbnailForm />
 		</>
 	);
 }
