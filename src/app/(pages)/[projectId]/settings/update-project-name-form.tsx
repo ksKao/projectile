@@ -17,7 +17,7 @@ export default function UpdateProjectNameForm() {
 	const [nameError, setNameError] = useState("");
 	const { mutate, isLoading } = api.project.updateProject.useMutation({
 		onSuccess: async () => {
-			await utils.project.getProject.invalidate();
+			await utils.project.invalidate();
 			router.refresh(); // needed to update the page title
 			toast.success("Project name has been updated");
 		},

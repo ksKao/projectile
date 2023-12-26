@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next-nprogress-bar";
 import Image from "next/image";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
@@ -13,6 +14,7 @@ import { api } from "~/trpc/react";
 export default function UpdateProjectThumbnailForm() {
 	const project = useProject();
 	const utils = api.useUtils();
+	const router = useRouter();
 	const [projectThumbnail, setProjectThumbnail] = useState<File | null>(null);
 	const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(
 		project.thumbnailUrl,
@@ -35,7 +37,8 @@ export default function UpdateProjectThumbnailForm() {
 					);
 
 				if (res.error) throw new Error(res.error.message);
-				await utils.project.getProject.invalidate();
+				await utils.project.invalidate();
+				router.refresh(); // needed to update home page data
 			} catch (e) {
 				if (e instanceof Error) toast.error(e.message);
 				else

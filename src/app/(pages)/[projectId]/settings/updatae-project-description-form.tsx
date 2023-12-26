@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next-nprogress-bar";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { IoIosSave } from "react-icons/io";
@@ -11,12 +12,14 @@ import { api } from "~/trpc/react";
 export default function UpdateProjectDescriptionForm() {
 	const project = useProject();
 	const utils = api.useUtils();
+	const router = useRouter();
 	const [projectDescription, setProjectDescription] = useState(
 		project.description,
 	);
 	const { mutate, isLoading } = api.project.updateProject.useMutation({
 		onSuccess: async () => {
-			await utils.project.getProject.invalidate();
+			await utils.project.invalidate();
+			router.refresh(); // needed to update home page data
 			toast.success("Project description has been updated");
 		},
 		onError: (e) =>
