@@ -6,8 +6,6 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export function cuid() {
-	return init({
-		length: 16,
-	});
-}
+export const cuid = init({
+	length: 16,
+});

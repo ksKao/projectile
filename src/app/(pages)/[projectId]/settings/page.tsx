@@ -3,6 +3,7 @@ import UpdateProjectNameForm from "./update-project-name-form";
 import UpdateProjectDescriptionForm from "./updatae-project-description-form";
 import UpdateProjectDueDateForm from "./update-project-due-date-form";
 import UpdateProjectThumbnailForm from "./update-project-thumbnail-form";
+import RegeneratePasswordForm from "./regenerate-password";
 
 export default function ProjectSettingsPage() {
 	return (
@@ -15,6 +16,8 @@ export default function ProjectSettingsPage() {
 			<UpdateProjectDueDateForm />
 			<div className="mt-5" />
 			<UpdateProjectThumbnailForm />
+			<div className="mt-5" />
+			<RegeneratePasswordForm />
 		</>
 	);
 }

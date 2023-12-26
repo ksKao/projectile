@@ -2,6 +2,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createProjectSchema } from "~/lib/schema";
+import { cuid } from "~/lib/utils";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { supabase } from "~/server/supabase";
@@ -474,5 +475,51 @@ export const projectRouter = createTRPCRouter({
 			}
 
 			return res.data;
+		}),
+	regeneratePassword: protectedProcedure
+		.input(z.string().uuid("Invalid project ID"))
+		.mutation(async ({ input, ctx }) => {
+			let project;
+			try {
+				project = await ctx.db.projects.findFirst({
+					where: {
+						id: input,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!project)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Project does not exist",
+				});
+
+			if (project.leader !== ctx.auth.userId)
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message:
+						"Only the project leader can regenerate the password",
+				});
+
+			const newPassword = cuid();
+
+			try {
+				const { password } = await ctx.db.projects.update({
+					where: {
+						id: input,
+					},
+					data: {
+						password: newPassword,
+					},
+					select: {
+						password: true,
+					},
+				});
+				return password;
+			} catch {
+				throw ctx.internalServerError;
+			}
 		}),
 });
