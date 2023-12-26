@@ -21,6 +21,7 @@ export default function ProjectSettingsPage() {
 			<RegeneratePasswordForm />
 			<div className="mt-5" />
 			<DeleteProjectDialog />
+			<div className="h-5" />
 		</>
 	);
 }

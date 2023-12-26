@@ -43,7 +43,7 @@ export default function DeleteProjectDialog() {
 					be lost.
 					<div className="w-full flex gap-2 justify-end">
 						<Button
-							variant="ghost"
+							variant="outline"
 							onClick={() => {
 								if (!isLoading) setOpen(false);
 							}}
