@@ -21,6 +21,7 @@ export default function DeleteProjectDialog() {
 		onSuccess: async () => {
 			toast.success("Project has been deleted");
 			router.replace("/");
+			router.refresh();
 			await utils.project.getAllProjects.invalidate();
 		},
 		onError: (e) =>
