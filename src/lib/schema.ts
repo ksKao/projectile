@@ -55,3 +55,29 @@ export const createProjectSchema = z.object({
 	dueDate: z.date(),
 	image: z.string().min(1, "Project thumbnail is required"),
 });
+
+export const changePasswordSchema = z
+	.object({
+		currentPassword: z.string().min(1, "Current password is required"),
+		newPassword: z
+			.string()
+			.min(1, { message: "New password is required" })
+			.min(8, { message: "Password must be at least 8 characters" }),
+		confirmPassword: z
+			.string()
+			.min(1, { message: "Confirm password is required" }),
+	})
+	.superRefine(({ confirmPassword, newPassword }, ctx) => {
+		if (newPassword !== confirmPassword) {
+			ctx.addIssue({
+				code: "custom",
+				message: "Passwords do not match",
+				path: ["newPassword"],
+			});
+			ctx.addIssue({
+				code: "custom",
+				message: "Passwords do not match",
+				path: ["confirmPassword"],
+			});
+		}
+	});

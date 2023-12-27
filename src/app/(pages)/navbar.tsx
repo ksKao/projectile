@@ -22,7 +22,7 @@ import { AvatarImage } from "@radix-ui/react-avatar";
 export default function Navbar() {
 	const { signOut } = useClerk();
 	const router = useRouter();
-	const { user } = useUser();
+	const { user, isLoaded, isSignedIn } = useUser();
 	const { theme, setTheme } = useTheme();
 	const [isClient, setIsClient] = useState(false); // for hydration error
 
@@ -96,7 +96,7 @@ export default function Navbar() {
 					<FaGear className="w-4 h-4" />
 				</Button>
 
-				{user ? (
+				{isLoaded && isSignedIn ? (
 					<Avatar className="w-9 h-9">
 						<AvatarImage
 							src={user.imageUrl}
