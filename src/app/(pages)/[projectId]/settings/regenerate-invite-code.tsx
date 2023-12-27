@@ -10,7 +10,7 @@ import { Label } from "~/components/ui/label";
 import { useProject } from "~/lib/contexts/projectContext";
 import { api } from "~/trpc/react";
 
-export default function RegeneratePasswordForm() {
+export default function RegenerateInviteCode() {
 	const project = useProject();
 	const [password, setPassword] = useState(project.password);
 	const utils = api.useUtils();
@@ -26,7 +26,7 @@ export default function RegeneratePasswordForm() {
 	});
 	return (
 		<div className="md:max-w-[500px]">
-			<Label>Project Password</Label>
+			<Label>Project Invite Code</Label>
 			<div className="flex gap-2 justify-between w-full">
 				<Input disabled value={password} className="-mb-5" />
 				<Button
@@ -35,7 +35,7 @@ export default function RegeneratePasswordForm() {
 							.writeText(password)
 							.then(() =>
 								toast.success(
-									"Password has been copied to clipboard",
+									"Invite code has been copied to clipboard",
 								),
 							)
 							.catch(() => {

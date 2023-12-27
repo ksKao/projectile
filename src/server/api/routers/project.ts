@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createProjectSchema } from "~/lib/schema";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { db } from "~/server/db";
 import { supabase } from "~/server/supabase";
 
 export const projectRouter = createTRPCRouter({
@@ -133,6 +134,7 @@ export const projectRouter = createTRPCRouter({
 			return projects.map((p) => {
 				return {
 					...p,
+					password: p.leader === ctx.auth.userId ? p.password : "",
 					members: [] as {
 						userId: string;
 						imageUrl: string;
@@ -182,6 +184,7 @@ export const projectRouter = createTRPCRouter({
 			return projects.map((p, i) => {
 				return {
 					...p,
+					password: ctx.auth.userId === p.leader ? p.password : "",
 					members: p.members.map((member) =>
 						memberInfos.find((m) => m.userId === member),
 					),
@@ -244,6 +247,8 @@ export const projectRouter = createTRPCRouter({
 
 			return {
 				...project,
+				password:
+					project.leader === ctx.auth.userId ? project.password : "",
 				members: userList,
 				thumbnailUrl,
 			};
@@ -494,8 +499,21 @@ export const projectRouter = createTRPCRouter({
 				throw new TRPCError({
 					code: "UNAUTHORIZED",
 					message:
-						"Only the project leader can regenerate the password",
+						"Only the project leader can regenerate the invite code",
 				});
+
+			async function createUniqueCode(code?: string) {
+				const newCode = code ?? createId();
+				const project = await db.projects.findFirst({
+					where: {
+						password: newCode,
+					},
+				});
+
+				if (!project) return newCode;
+
+				return await createUniqueCode(createId());
+			}
 
 			try {
 				const { password } = await ctx.db.projects.update({
@@ -503,13 +521,55 @@ export const projectRouter = createTRPCRouter({
 						id: input,
 					},
 					data: {
-						password: createId(),
+						password: await createUniqueCode(),
 					},
 					select: {
 						password: true,
 					},
 				});
 				return password;
+			} catch {
+				throw ctx.internalServerError;
+			}
+		}),
+	joinProject: protectedProcedure
+		.input(z.string().min(1, "Invite code is required"))
+		.mutation(async ({ input, ctx }) => {
+			let project;
+			try {
+				project = await ctx.db.projects.findFirst({
+					where: {
+						password: input,
+					},
+				});
+			} catch {
+				throw ctx.internalServerError;
+			}
+
+			if (!project)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Invalid invite code",
+				});
+
+			if (project.members.includes(ctx.auth.userId))
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "You have already joined this project",
+				});
+
+			try {
+				const updated = await ctx.db.projects.update({
+					where: {
+						id: project.id,
+					},
+					data: {
+						members: {
+							push: ctx.auth.userId,
+						},
+					},
+				});
+				return updated.id;
 			} catch {
 				throw ctx.internalServerError;
 			}

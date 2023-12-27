@@ -3,7 +3,7 @@ import UpdateProjectNameForm from "./update-project-name-form";
 import UpdateProjectDescriptionForm from "./updatae-project-description-form";
 import UpdateProjectDueDateForm from "./update-project-due-date-form";
 import UpdateProjectThumbnailForm from "./update-project-thumbnail-form";
-import RegeneratePasswordForm from "./regenerate-password";
+import RegenerateInviteCode from "./regenerate-invite-code";
 import DeleteProjectDialog from "./delete-project-dialog";
 
 export default function ProjectSettingsPage() {
@@ -18,7 +18,7 @@ export default function ProjectSettingsPage() {
 			<div className="mt-5" />
 			<UpdateProjectThumbnailForm />
 			<div className="mt-5" />
-			<RegeneratePasswordForm />
+			<RegenerateInviteCode />
 			<div className="mt-5" />
 			<DeleteProjectDialog />
 			<div className="h-5" />

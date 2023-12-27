@@ -80,6 +80,13 @@ export const threadsRouter = createTRPCRouter({
 				const { replies, ...restThread } = thread;
 				return {
 					...restThread,
+					project: {
+						...restThread.project,
+						password:
+							restThread.project.leader === ctx.auth.userId
+								? restThread.project.password
+								: "",
+					},
 					numberOfReplies: replies.length,
 				};
 			});
@@ -133,7 +140,16 @@ export const threadsRouter = createTRPCRouter({
 						"Only members of this project can view this thread.",
 				});
 
-			return thread;
+			return {
+				...thread,
+				project: {
+					...thread.project,
+					password:
+						thread.project.leader === ctx.auth.userId
+							? thread.project.password
+							: "",
+				},
+			};
 		}),
 	createReply: protectedProcedure
 		.input(

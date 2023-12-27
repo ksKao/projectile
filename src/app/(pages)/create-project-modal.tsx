@@ -24,6 +24,7 @@ import { createProjectSchema } from "~/lib/schema";
 import toast from "react-hot-toast";
 import { supabaseClient } from "~/lib/supabaseClient";
 import { useRouter } from "next-nprogress-bar";
+import { MdAssignmentAdd } from "react-icons/md";
 
 type ProjectInfo = {
 	name: string;
@@ -69,6 +70,7 @@ export default function CreateProjectModal() {
 				toast.error(res.error.message);
 			} else {
 				toast.success("Your project has been successfully created.");
+				setModalOpen(false);
 				router.refresh();
 			}
 		},
@@ -82,6 +84,7 @@ export default function CreateProjectModal() {
 		dueDate: new Date(),
 	});
 	const [calendarOpen, setCalendarOpen] = useState(false);
+	const [modalOpen, setModalOpen] = useState(false);
 
 	const createProject: React.FormEventHandler<HTMLFormElement> = (e) => {
 		e.preventDefault();
@@ -110,9 +113,12 @@ export default function CreateProjectModal() {
 	};
 
 	return (
-		<Dialog>
+		<Dialog open={modalOpen} onOpenChange={setModalOpen}>
 			<DialogTrigger asChild>
-				<Button className="font-semibold">Create Project</Button>
+				<Button className="font-semibold">
+					<MdAssignmentAdd />
+					<span className="ml-2 hidden md:block">Create Project</span>
+				</Button>
 			</DialogTrigger>
 			<DialogContent className="max-w-[80vw] w-96">
 				<DialogHeader>

@@ -13,9 +13,19 @@ import {
 	DropdownMenuTrigger,
 	DropdownMenuContent,
 } from "~/components/ui/dropdown-menu";
-import { FaEllipsisH } from "react-icons/fa";
+import { FaEllipsisH, FaRegClipboard } from "react-icons/fa";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
+import { IoPersonAdd } from "react-icons/io5";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 
 export default function Project() {
 	const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
@@ -43,7 +53,59 @@ export default function Project() {
 
 	return (
 		<>
-			<h1 className="text-2xl font-bold">Project Dashboard</h1>
+			<div className="flex justify-between items-center">
+				<h1 className="text-2xl font-bold">Project Dashboard</h1>
+				{project.leader === user?.id && (
+					<Dialog>
+						<DialogTrigger asChild>
+							<Button>
+								<IoPersonAdd />
+								<span className="ml-2 hidden md:block">
+									Invite
+								</span>
+							</Button>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Invite a new member</DialogTitle>
+							</DialogHeader>
+							<p className="text-muted-foreground text-sm text-center md:text-left">
+								Send the invite code to a person that you would
+								like to invite.
+							</p>
+							<div>
+								<div>
+									<Label>Invite Code</Label>
+									<div className="w-full flex gap-2">
+										<Input
+											value={project.password}
+											disabled
+										/>
+										<Button
+											onClick={() => {
+												navigator.clipboard
+													.writeText(project.password)
+													.then(() =>
+														toast.success(
+															"Password has been copied to clipboard",
+														),
+													)
+													.catch(() => {
+														toast.error(
+															"Something went wrong while copying.",
+														);
+													});
+											}}
+										>
+											<FaRegClipboard />
+										</Button>
+									</div>
+								</div>
+							</div>
+						</DialogContent>
+					</Dialog>
+				)}
+			</div>
 			<div className="flex flex-col md:flex-row mt-4">
 				<div className="relative min-w-[9rem] min-h-[9rem] w-36 h-36">
 					{!thumbnailLoaded && (

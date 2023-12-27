@@ -184,6 +184,13 @@ export const filesRouter = createTRPCRouter({
 				return files.map((f) => {
 					return {
 						...f,
+						project: {
+							...f.project,
+							password:
+								f.project.leader === ctx.auth.userId
+									? f.project.password
+									: "",
+						},
 						downloadUrl: "",
 					};
 				});
@@ -196,7 +203,18 @@ export const filesRouter = createTRPCRouter({
 					message:
 						"Only members of this project can view these files.",
 				});
-			return files;
+			return files.map((f) => {
+				return {
+					...f,
+					project: {
+						...f.project,
+						password:
+							f.project.leader === ctx.auth.userId
+								? f.project.password
+								: "",
+					},
+				};
+			});
 		}),
 	getDownloadUrl: protectedProcedure
 		.input(z.string().uuid("Invalid file ID"))
