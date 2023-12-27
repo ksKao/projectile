@@ -46,7 +46,7 @@ export default function SignIn() {
 
 			if (result?.status === "complete") {
 				await setActive?.({ session: result.createdSessionId });
-				router.push("/");
+				router.replace("/");
 			}
 		} catch (e: any) {
 			if (e.errors?.[0]?.longMessage) {
