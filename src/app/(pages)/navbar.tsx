@@ -31,7 +31,7 @@ export default function Navbar() {
 	}, []);
 
 	return (
-		<nav className="w-screen h-24 bg-background flex justify-between items-center px-8 md:px-12 lg:px-16">
+		<nav className="w-screen h-24 bg-background flex justify-between items-center px-8 md:px-12">
 			<Link href="/" className="flex items-center gap-2 md:gap-4">
 				<Image src="/logo.png" alt="Logo" width={40} height={40} />
 				<h1 className="font-bold text-xl select-none">Projectile</h1>
