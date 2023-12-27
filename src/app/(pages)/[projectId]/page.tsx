@@ -16,7 +16,7 @@ import {
 import { FaEllipsisH, FaRegClipboard } from "react-icons/fa";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
-import { IoPersonAdd } from "react-icons/io5";
+import { IoExit, IoPersonAdd } from "react-icons/io5";
 import {
 	Dialog,
 	DialogContent,
@@ -26,13 +26,24 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { useRouter } from "next-nprogress-bar";
 
 export default function Project() {
 	const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
+	const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 	const { user } = useUser();
 	const utils = api.useUtils();
+	const router = useRouter();
 	const removeMutation = api.project.removeMember.useMutation({
-		onSuccess: () => toast.success("Member has been removed"),
+		onSuccess: async (removedId) => {
+			toast.success(
+				removedId === user?.id
+					? "You have left the project."
+					: "Member has been removed",
+			);
+			await utils.project.getAllProjects.refetch();
+			if (removedId === user?.id) router.push("/");
+		},
 		onError: (e) =>
 			toast.error(
 				e.data?.zodError?.fieldErrors.projectId?.[0] ?? e.message,
@@ -136,7 +147,50 @@ export default function Project() {
 					</p>
 				</div>
 			</div>
-			<h2 className="text-2xl font-bold mt-8">Members</h2>
+			<div className="flex justify-between items-center mt-8">
+				<h2 className="text-2xl font-bold">Members</h2>
+				<Dialog
+					open={leaveDialogOpen}
+					onOpenChange={setLeaveDialogOpen}
+				>
+					<DialogTrigger asChild>
+						<Button variant="destructive">
+							<IoExit />
+							<span className="ml-2 hidden md:block">
+								Leave Project
+							</span>
+						</Button>
+					</DialogTrigger>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>Leave Project?</DialogTitle>
+						</DialogHeader>
+						Are you sure you want to leave this project? You will
+						not be able to join back unless you have the invite
+						code.
+						<div className="w-full flex justify-end items-center gap-2">
+							<Button
+								variant="outline"
+								onClick={() => setLeaveDialogOpen(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant="destructive"
+								loading={removeMutation.isLoading}
+								onClick={() => {
+									removeMutation.mutate({
+										projectId: project.id,
+										removeMemberId: user?.id ?? "",
+									});
+								}}
+							>
+								Leave
+							</Button>
+						</div>
+					</DialogContent>
+				</Dialog>
+			</div>
 			<ul className="py-4">
 				{project.members
 					.sort(

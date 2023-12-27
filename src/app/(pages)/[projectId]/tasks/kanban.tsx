@@ -29,7 +29,7 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 			}
 		},
 		onSettled: async () => {
-			await utils.kanban.getColumns.invalidate();
+			await utils.kanban.getColumns.refetch();
 		},
 	});
 	const { isLoading, mutate: updateTaskOrder } =
@@ -47,8 +47,7 @@ export default function Kanban({ columns }: { columns: Column[] }) {
 				}
 			},
 			onSettled: async () => {
-				// router.refresh();
-				await utils.kanban.getColumns.invalidate();
+				await utils.kanban.getColumns.refetch();
 			},
 		});
 	const utils = api.useUtils();

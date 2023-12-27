@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next-nprogress-bar";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { IoIosSave } from "react-icons/io";
@@ -12,13 +11,12 @@ import { api } from "~/trpc/react";
 export default function UpdateProjectNameForm() {
 	const project = useProject();
 	const utils = api.useUtils();
-	const router = useRouter();
 	const [projectName, setProjectName] = useState(project.name);
 	const [nameError, setNameError] = useState("");
 	const { mutate, isLoading } = api.project.updateProject.useMutation({
 		onSuccess: async () => {
-			await utils.project.invalidate();
-			router.refresh(); // needed to update the page title
+			await utils.project.getProject.refetch();
+			await utils.project.getAllProjects.refetch();
 			toast.success("Project name has been updated");
 		},
 		onError: (e) => {

@@ -15,7 +15,7 @@ export default function ColumnName({
 	const inputRef = useRef<HTMLInputElement>(null);
 	const utils = api.useUtils();
 	const { mutate } = api.kanban.changeColumnName.useMutation({
-		onSettled: () => utils.kanban.getColumns.invalidate(),
+		onSettled: () => utils.kanban.getColumns.refetch(),
 	});
 
 	useEffect(() => {

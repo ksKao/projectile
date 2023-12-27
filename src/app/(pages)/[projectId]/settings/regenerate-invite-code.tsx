@@ -18,7 +18,8 @@ export default function RegenerateInviteCode() {
 	const { mutate, isLoading } = api.project.regeneratePassword.useMutation({
 		onSuccess: async (data) => {
 			setPassword(data);
-			await utils.project.invalidate();
+			await utils.project.getProject.refetch();
+			await utils.project.getAllProjects.refetch();
 			router.refresh();
 		},
 		onError: (e) =>

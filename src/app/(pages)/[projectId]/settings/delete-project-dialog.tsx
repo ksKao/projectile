@@ -22,7 +22,7 @@ export default function DeleteProjectDialog() {
 			toast.success("Project has been deleted");
 			router.replace("/");
 			router.refresh();
-			await utils.project.getAllProjects.invalidate();
+			await utils.project.getAllProjects.refetch();
 		},
 		onError: (e) =>
 			toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message),

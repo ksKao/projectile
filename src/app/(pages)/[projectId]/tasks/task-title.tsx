@@ -28,7 +28,7 @@ export default function TaskTitle({
 					e.data?.zodError?.fieldErrors.taskId?.[0] ??
 					e.message,
 			),
-		onSettled: async () => await utils.kanban.getColumns.invalidate(),
+		onSettled: async () => await utils.kanban.getColumns.refetch(),
 	});
 
 	useEffect(() => {

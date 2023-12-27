@@ -21,7 +21,8 @@ export default function JoinProjectModal() {
 	const { mutate, isLoading } = api.project.joinProject.useMutation({
 		onSuccess: async (projectId) => {
 			toast.success("You have joined a new project");
-			await utils.project.invalidate();
+			await utils.project.getAllProjects.refetch();
+			await utils.project.getProject.refetch();
 			router.refresh();
 			router.push("/" + projectId);
 		},

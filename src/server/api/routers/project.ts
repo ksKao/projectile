@@ -361,6 +361,7 @@ export const projectRouter = createTRPCRouter({
 						id: input.projectId,
 					},
 				});
+				return input.removeMemberId;
 			} catch {
 				throw ctx.internalServerError;
 			}

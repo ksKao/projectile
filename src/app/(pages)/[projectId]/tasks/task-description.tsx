@@ -26,7 +26,7 @@ export default function TaskDescription({
 		},
 		onError: (e) =>
 			toast.error(e.data?.zodError?.fieldErrors.taskId?.[0] ?? e.message),
-		onSettled: () => utils.kanban.getColumns.invalidate(),
+		onSettled: () => utils.kanban.getColumns.refetch(),
 	});
 	const [showEditor, setShowEditor] = useState(description.length !== 0);
 	const [editable, setEditable] = useState(false);

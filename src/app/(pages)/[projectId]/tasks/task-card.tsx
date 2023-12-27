@@ -31,7 +31,7 @@ export default function TaskCard({
 	const { isLoading, mutate } = api.kanban.deleteTask.useMutation({
 		onSuccess: async () => {
 			toast.success("Task deleted successfully");
-			await utils.kanban.getColumns.invalidate();
+			await utils.kanban.getColumns.refetch();
 		},
 		onError: (e) =>
 			toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message),

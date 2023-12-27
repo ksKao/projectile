@@ -41,7 +41,7 @@ export default function KanbanColumn({
 			onError: (e) => {
 				toast.error(e.data?.zodError?.formErrors?.[0] ?? e.message);
 			},
-			onSettled: () => utils.kanban.getColumns.invalidate(),
+			onSettled: () => utils.kanban.getColumns.refetch(),
 		});
 
 	return (

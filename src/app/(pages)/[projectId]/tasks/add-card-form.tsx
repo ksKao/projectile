@@ -40,7 +40,7 @@ export default function AddCardForm({
 				inputRef.current.disabled = false;
 				inputRef.current.focus();
 			}
-			await utils.kanban.getColumns.invalidate();
+			await utils.kanban.getColumns.refetch();
 		},
 	});
 	const [cardTitle, setCardTitle] = useState("");

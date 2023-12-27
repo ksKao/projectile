@@ -29,7 +29,7 @@ export default function TaskAssignedMembers({
 		api.kanban.modifyTaskAssignedMember.useMutation({
 			onSuccess: (message) => toast.success(message),
 			onError: (e) => toast.error(e.message),
-			onSettled: () => utils.kanban.getColumns.invalidate(),
+			onSettled: () => utils.kanban.getColumns.refetch(),
 		});
 
 	const notAssignedMembers = project.members.filter(

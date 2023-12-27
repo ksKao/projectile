@@ -1,6 +1,5 @@
 "use client";
 import { format } from "date-fns";
-import { useRouter } from "next-nprogress-bar";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { IoIosSave } from "react-icons/io";
@@ -19,13 +18,12 @@ import { api } from "~/trpc/react";
 export default function UpdateProjectDueDateForm() {
 	const project = useProject();
 	const utils = api.useUtils();
-	const router = useRouter();
 	const [calendarOpen, setCalendarOpen] = useState(false);
 	const [projectDueDate, setProjectDueDate] = useState(project.dueDate);
 	const { mutate, isLoading } = api.project.updateProject.useMutation({
 		onSuccess: async () => {
-			await utils.project.invalidate();
-			router.refresh(); // needed to update home page data
+			await utils.project.getProject.refetch();
+			await utils.project.getAllProjects.refetch();
 			toast.success("Project description has been updated");
 		},
 		onError: (e) =>

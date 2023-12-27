@@ -30,7 +30,7 @@ export default function TaskDueDatePicker({
 					e.data?.zodError?.fieldErrors?.taskId?.[0] ??
 					e.message,
 			),
-		onSettled: () => utils.kanban.getColumns.invalidate(),
+		onSettled: () => utils.kanban.getColumns.refetch(),
 	});
 
 	return (

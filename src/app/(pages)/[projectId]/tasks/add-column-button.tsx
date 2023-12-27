@@ -16,7 +16,7 @@ export default function AddColumnButton() {
 			setColumnName("");
 			setEditing(false);
 			toast.success("A new column has been added");
-			await utils.kanban.getColumns.invalidate();
+			await utils.kanban.getColumns.refetch();
 		},
 		onError: (e) => {
 			if (e.data?.zodError) {
