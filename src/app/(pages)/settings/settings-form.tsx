@@ -6,6 +6,13 @@ import React, { type FormEventHandler, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { IoMdTrash } from "react-icons/io";
 import { Button } from "~/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import LoadingSpinner from "~/components/ui/loading-spinner";
@@ -31,6 +38,8 @@ export default function SettingsForm({
 	const [passwordError, setPasswordError] = useState(emptyPasswords);
 	const [profileLoading, setProfileLoading] = useState(false);
 	const [passwordLoading, setPasswordLoading] = useState(false);
+	const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
 	const [previewImageUrl, setPreviewImageUrl] = useState(
 		defaultImageUrl ?? "",
@@ -128,6 +137,30 @@ export default function SettingsForm({
 			}
 		} finally {
 			setPasswordLoading(false);
+		}
+	};
+
+	const deleteAccount: React.MouseEventHandler<
+		HTMLButtonElement
+	> = async () => {
+		setDeleteAccountLoading(true);
+
+		try {
+			await clerk?.delete();
+			toast.success("Your account has been deleted.");
+			router.push("/sign-in");
+		} catch (e: any) {
+			if (e.errors?.[0]?.longMessage) {
+				toast.error(e.errors[0].longMessage);
+			} else if (e.errors?.[0]?.message) {
+				toast.error(e.errors[0].message);
+			} else if (e instanceof Error) {
+				toast.error(e.message);
+			} else {
+				toast.error("Something went wrong. Please try again");
+			}
+		} finally {
+			setDeleteAccountLoading(false);
 		}
 	};
 
@@ -292,6 +325,43 @@ export default function SettingsForm({
 					</div>
 				</div>
 			</form>
+			<div className="my-4">
+				<h2 className="font-semibold text-lg my-4">Delete Account</h2>
+				<div className="w-full flex justify-end">
+					<Dialog
+						open={deleteDialogOpen}
+						onOpenChange={setDeleteDialogOpen}
+					>
+						<DialogTrigger asChild>
+							<Button variant="destructive">
+								Delete Account
+							</Button>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Confirm Delete</DialogTitle>
+							</DialogHeader>
+							Are you absolutely sure that you want to delete your
+							account. This action is irreversible.
+							<div className="w-full justify-end flex gap-2">
+								<Button
+									variant="outline"
+									onClick={() => setDeleteDialogOpen(false)}
+								>
+									Cancel
+								</Button>
+								<Button
+									variant="destructive"
+									onClick={deleteAccount}
+									loading={deleteAccountLoading}
+								>
+									Confirm
+								</Button>
+							</div>
+						</DialogContent>
+					</Dialog>
+				</div>
+			</div>
 		</div>
 	);
 }

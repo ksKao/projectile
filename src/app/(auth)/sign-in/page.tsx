@@ -110,6 +110,9 @@ export default function SignIn() {
 				<Button className="w-full mt-6" loading={loading}>
 					Sign In
 				</Button>
+				<Button className="w-full mt-2" variant="outline" type="button">
+					Sign In as Example User
+				</Button>
 				<p className="w-full text-center mt-2">
 					Don&apos;t have an account?{" "}
 					<Link

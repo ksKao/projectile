@@ -29,6 +29,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 	const divRef = useRef<HTMLDivElement>(null);
 	const { ref } = useResizeObserver<HTMLDivElement>({
 		onResize: ({ width = 0 }) => {
+			const existingMembers = project.members.filter((m) => !!m);
 			// this is the number that will be shown when there is more members in a group than the width of the div
 			setNumberOfExtraMembers(0);
 			// take the min of the number of members in a project and the max number of members that can be rendered
@@ -43,18 +44,18 @@ export default function ProjectCard({ project }: { project: Project }) {
 					(width - 16 - 96 - 16 - 16) / (memberImageDimension + 8) -
 						1,
 				),
-				project.members.length,
+				existingMembers.length,
 			);
 
 			if (project.members.length > numberOfMembersToRender) {
 				setNumberOfExtraMembers(
-					project.members.length - numberOfMembersToRender,
+					existingMembers.length - numberOfMembersToRender,
 				);
 			}
 
 			setMembersToRender([]);
 			for (let i = 0; i < numberOfMembersToRender; i++) {
-				setMembersToRender((prev) => prev.concat([project.members[i]]));
+				setMembersToRender((prev) => prev.concat([existingMembers[i]]));
 			}
 		},
 	});
