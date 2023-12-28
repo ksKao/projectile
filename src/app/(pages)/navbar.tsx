@@ -16,8 +16,7 @@ import {
 import { useTheme } from "next-themes";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { useEffect, useState } from "react";
-import { Avatar } from "~/components/ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage } from "~/components/ui/avatar";
 
 export default function Navbar() {
 	const { signOut } = useClerk();

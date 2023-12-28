@@ -8,8 +8,7 @@ import {
 	DialogTrigger,
 } from "~/components/ui/dialog";
 import { useProject } from "~/lib/contexts/projectContext";
-import { Avatar } from "~/components/ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage } from "~/components/ui/avatar";
 import { formatDistanceStrict } from "date-fns";
 import TaskDueDatePicker from "./task-due-date-picker";
 import TaskAssignedMembers from "./task-assigned-members";
@@ -87,6 +86,10 @@ export default function TaskCard({
 															<AvatarImage
 																src={
 																	member.imageUrl
+																}
+																alt={
+																	member.username ??
+																	member.id
 																}
 															/>
 														</Avatar>

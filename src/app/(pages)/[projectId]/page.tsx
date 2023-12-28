@@ -27,6 +27,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useRouter } from "next-nprogress-bar";
+import { Avatar, AvatarImage } from "~/components/ui/avatar";
 
 export default function Project() {
 	const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
@@ -200,13 +201,14 @@ export default function Project() {
 					.map((m) => (
 						<li key={m.id} className="flex mb-4 justify-between">
 							<div className="flex gap-4 items-center flex-grow min-w-0">
-								<Image
-									src={m.imageUrl}
-									alt={m.username ?? m.id}
-									width={40}
-									height={40}
-									className="rounded-full"
-								/>
+								<Avatar>
+									<AvatarImage
+										src={m.imageUrl}
+										alt={m.username ?? m.id}
+										width={40}
+										height={40}
+									/>
+								</Avatar>
 								<p className="truncate">
 									{m.username}{" "}
 									{project.leader === m.id && (
