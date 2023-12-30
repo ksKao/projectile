@@ -16,6 +16,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import LoadingSpinner from "~/components/ui/loading-spinner";
+import { env } from "~/env.mjs";
 import { changePasswordSchema } from "~/lib/schema";
 
 const emptyPasswords = {
@@ -325,43 +326,50 @@ export default function SettingsForm({
 					</div>
 				</div>
 			</form>
-			<div className="my-4">
-				<h2 className="font-semibold text-lg my-4">Delete Account</h2>
-				<div className="w-full flex justify-end">
-					<Dialog
-						open={deleteDialogOpen}
-						onOpenChange={setDeleteDialogOpen}
-					>
-						<DialogTrigger asChild>
-							<Button variant="destructive">
-								Delete Account
-							</Button>
-						</DialogTrigger>
-						<DialogContent>
-							<DialogHeader>
-								<DialogTitle>Confirm Delete</DialogTitle>
-							</DialogHeader>
-							Are you absolutely sure that you want to delete your
-							account. This action is irreversible.
-							<div className="w-full justify-end flex gap-2">
-								<Button
-									variant="outline"
-									onClick={() => setDeleteDialogOpen(false)}
-								>
-									Cancel
+			{user.emailAddresses?.[0]?.emailAddress !==
+				env.NEXT_PUBLIC_EXAMPLE_ACCOUNT_EMAIL && (
+				<div className="my-4">
+					<h2 className="font-semibold text-lg my-4">
+						Delete Account
+					</h2>
+					<div className="w-full flex justify-end">
+						<Dialog
+							open={deleteDialogOpen}
+							onOpenChange={setDeleteDialogOpen}
+						>
+							<DialogTrigger asChild>
+								<Button variant="destructive">
+									Delete Account
 								</Button>
-								<Button
-									variant="destructive"
-									onClick={deleteAccount}
-									loading={deleteAccountLoading}
-								>
-									Confirm
-								</Button>
-							</div>
-						</DialogContent>
-					</Dialog>
+							</DialogTrigger>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>Confirm Delete</DialogTitle>
+								</DialogHeader>
+								Are you absolutely sure that you want to delete
+								your account. This action is irreversible.
+								<div className="w-full justify-end flex gap-2">
+									<Button
+										variant="outline"
+										onClick={() =>
+											setDeleteDialogOpen(false)
+										}
+									>
+										Cancel
+									</Button>
+									<Button
+										variant="destructive"
+										onClick={deleteAccount}
+										loading={deleteAccountLoading}
+									>
+										Confirm
+									</Button>
+								</div>
+							</DialogContent>
+						</Dialog>
+					</div>
 				</div>
-			</div>
+			)}
 		</div>
 	);
 }
