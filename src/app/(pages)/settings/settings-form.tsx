@@ -243,7 +243,7 @@ export default function SettingsForm({
 							ref={fileInputRef}
 							id="profilePicture"
 							name="profilePicture"
-							accept="image/png, image/jpg"
+							accept="image/png, image/jpg, image/jpeg"
 							disabled={profileLoading}
 							onChange={(e) => {
 								const file = e.currentTarget.files?.[0];

@@ -32,7 +32,7 @@ export default function ThreadCard({
 						<AvatarFallback>N/A</AvatarFallback>
 					</Avatar>
 					<div className="max-w-full min-w-0">
-						<CardTitle className="mb-1 truncate w-full">
+						<CardTitle className="truncate w-full p-2 pl-0">
 							{thread.title}
 						</CardTitle>
 					</div>
@@ -41,7 +41,7 @@ export default function ThreadCard({
 					<p className="truncate min-w-0">
 						{thread.content.replace(/<[^>]*>/g, "")}
 					</p>
-					<div className="items-center flex gap-6 text-muted-foreground mt-4">
+					<div className="items-center flex gap-3 md:gap-6 text-muted-foreground mt-4 flex-wrap">
 						<span className="inline-flex items-center gap-2">
 							<FaRegUserCircle />
 							{author?.username ?? "Removed"}

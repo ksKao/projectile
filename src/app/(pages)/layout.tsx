@@ -14,7 +14,7 @@ export default async function PagesLayout({
 	return (
 		<>
 			<Navbar />
-			<main className="mx-8 md:mx-12 h-[calc(100svh-96px)] flex flex-col">
+			<main className="px-8 md:px-12 h-[calc(100svh-96px)] flex flex-col overflow-y-auto scrollbar-hide md:scrollbar-default overflow-x-hidden">
 				{children}
 			</main>
 		</>
