@@ -136,7 +136,7 @@ export default function TheadContent({ thread }: { thread: Thread }) {
 				</div>
 			)}
 			<div className="flex justify-between items-center max-w-full mt-4 text-muted-foreground flex-wrap">
-				<div className="items-center flex flex-grow gap-4">
+				<div className="items-center flex flex-grow gap-4 flex-wrap">
 					<span className="inline-flex items-center gap-2">
 						<FaRegUserCircle />
 						{author?.username ?? "Removed"}
@@ -168,7 +168,7 @@ export default function TheadContent({ thread }: { thread: Thread }) {
 							{!editing && thread.author === user.id && (
 								<Button
 									variant="ghost"
-									className="h-8 w-20 ml-4"
+									className="h-8 w-20"
 									onClick={() => {
 										setEditing(true);
 									}}

@@ -165,7 +165,7 @@ export default function SettingsForm({
 	};
 
 	return (
-		<div className="w-full md:max-w-[500px] py-4">
+		<div className="w-full md:max-w-[500px] pt-4">
 			<form onSubmit={handleProfileSubmit}>
 				<div className="my-4">
 					<h2 className="font-semibold text-lg my-4">Profile</h2>

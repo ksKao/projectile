@@ -9,8 +9,6 @@ export default async function PagesLayout({
 }) {
 	const user = await currentUser();
 
-	console.log("Layout running");
-
 	if (!user) redirect("/sign-in");
 
 	return (

@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { signInSchema } from "~/lib/schema";
+import { env } from "~/env.mjs";
 
 const emptyFields = {
 	email: "",
@@ -47,6 +48,34 @@ export default function SignIn() {
 			if (result?.status === "complete") {
 				await setActive?.({ session: result.createdSessionId });
 				router.replace("/");
+			}
+		} catch (e: any) {
+			if (e.errors?.[0]?.longMessage) {
+				toast.error(e.errors[0].longMessage);
+			} else if (e.errors?.[0]?.message) {
+				toast.error(e.errors[0].message);
+			} else if (e instanceof Error) {
+				toast.error(e.message);
+			} else {
+				toast.error("Something went wrong. Please try again");
+			}
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleExampleSignIn = async () => {
+		setLoading(true);
+
+		try {
+			const result = await signIn?.create({
+				identifier: env.NEXT_PUBLIC_EXAMPLE_ACCOUNT_EMAIL,
+				password: env.NEXT_PUBLIC_EXAMPLE_ACCOUNT_PASSWORD,
+			});
+
+			if (result?.status === "complete") {
+				await setActive?.({ session: result.createdSessionId });
+				router.replace("/example");
 			}
 		} catch (e: any) {
 			if (e.errors?.[0]?.longMessage) {
@@ -110,8 +139,14 @@ export default function SignIn() {
 				<Button className="w-full mt-6" loading={loading}>
 					Sign In
 				</Button>
-				<Button className="w-full mt-2" variant="outline" type="button">
-					Sign In as Example User
+				<Button
+					className="w-full mt-2"
+					variant="outline"
+					loading={loading}
+					type="button"
+					onClick={handleExampleSignIn}
+				>
+					Sign In with Example Account
 				</Button>
 				<p className="w-full text-center mt-2">
 					Don&apos;t have an account?{" "}
