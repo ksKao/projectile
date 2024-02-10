@@ -3,11 +3,8 @@ import { api } from "~/trpc/server";
 import ProjectCard from "./project-card";
 import Link from "next/link";
 import JoinProjectModal from "./join-project-modal";
-import { currentUser } from "@clerk/nextjs";
 
 export default async function Home() {
-	const user = await currentUser();
-	if (!user) return <></>;
 	const projects = await api.project.getAllProjects.query();
 
 	return (
