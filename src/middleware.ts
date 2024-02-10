@@ -8,6 +8,7 @@ export default authMiddleware({
 	afterAuth: () => {
 		return;
 	},
+	debug: true,
 });
 
 export const config = {
