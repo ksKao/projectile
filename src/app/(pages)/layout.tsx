@@ -1,19 +1,15 @@
-"use client";
-import { useUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs";
 import Navbar from "./navbar";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
-export default function PagesLayout({
+export default async function PagesLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	const user = useUser();
-	const router = useRouter();
+	const user = await currentUser();
 
-	if (user.isLoaded && !user.isSignedIn) router.replace("/sign-in");
-
-	if (!user.isLoaded) return <></>;
+	if (!user) redirect("/sign-in");
 
 	return (
 		<>
