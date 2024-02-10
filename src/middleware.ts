@@ -9,7 +9,6 @@ export default authMiddleware({
 		return;
 	},
 	debug: true,
-	clockSkewInMs: 50000,
 });
 
 export const config = {
