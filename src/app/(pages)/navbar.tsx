@@ -65,6 +65,7 @@ export default function Navbar() {
 						<DropdownMenuItem
 							onClick={async () => {
 								await signOut();
+								router.replace("/sign-in");
 							}}
 						>
 							Log Out
@@ -107,6 +108,7 @@ export default function Navbar() {
 				<Button
 					onClick={async () => {
 						await signOut();
+						router.replace("/sign-in");
 					}}
 				>
 					Log Out
