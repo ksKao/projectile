@@ -12,7 +12,7 @@ const config = {
 				hostname: "img.clerk.com",
 			},
 			{
-				hostname: "erwizundtgcsfnvlyvim.supabase.co",
+				hostname: "projectile-supabase-8b09cb-46-62-225-140.traefik.me",
 			},
 		],
 	},
